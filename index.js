@@ -13,6 +13,8 @@ import * as UserTasksController from "./controllers/UserTasksController.js";
 import * as TasksController from "./controllers/TasksController.js";
 import multer from "multer";
 import cors from "cors";
+import Tasks from "./models/Tasks.js";
+import UserTasks from "./models/UserTasks.js";
 
 mongoose
   .connect(
@@ -59,6 +61,70 @@ app.post(
   handleValidationErrors,
   TasksController.create
 );
+app.get("/tasksAll", async (req, res) => {
+  try {
+    // Получаем все задачи из базы данных
+    const tasks = await Tasks.find().exec();
+    res.json(tasks);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось получить список задач.",
+    });
+  }
+});
+
+app.get("/tasks", async (req, res) => {
+  try {
+    const taskId = req.query.id;
+    const userId = req.query.userId;
+    //const id = req.params.id.split("=")[1];
+    const task = await Tasks.findById(taskId).exec();
+    const userTask = await UserTasks.findOne({
+      task_id: taskId,
+      user_id: userId,
+    }).exec();
+    console.log(task);
+    console.log(userTask);
+    const answer = task.outputData;
+    const userAnswer = userTask.outputData;
+    let correctCount = 0;
+    let ans, userAns;
+
+    for (let i = 0; i < answer.length; i++) {
+      ans = answer[i];
+      userAns = userAnswer[i];
+
+      if (ans.toString() === userAns.toString()) {
+        correctCount++;
+      }
+    }
+    const percentage = Math.round((correctCount / answer.length) * 100);
+
+    // if (answer.toString() === userAnswer.toString()) {
+    //   mark = 100;
+    //   res.json({
+    //     message: "Вы ответили правильно!",
+    //   });
+    // } else {
+    //   res.json({
+    //     message: "Вы ответили неправильно!",
+    //   });
+    // }
+
+    res.json({ message: `Вы ответили правильно на ${percentage}% вопросов` });
+
+    await UserTasks.updateOne(
+      { task_id: taskId, user_id: userId },
+      { $set: { mark: percentage } }
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось проверить.",
+    });
+  }
+});
 
 app.post(
   "/user-tasks",
