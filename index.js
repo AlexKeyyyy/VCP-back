@@ -15,6 +15,7 @@ import multer from "multer";
 import cors from "cors";
 import Tasks from "./models/Tasks.js";
 import UserTasks from "./models/UserTasks.js";
+import User from "./models/User.js";
 
 mongoose
   .connect(
@@ -54,13 +55,62 @@ app.post(
 );
 app.get("/auth/me", checkAuth, UserController.getMe);
 
-app.post(
-  "/tasks",
-  checkAuth,
-  tasksCreateValidator,
-  handleValidationErrors,
-  TasksController.create
-);
+// app.post(
+//   "/tasks",
+//   checkAuth,
+//   tasksCreateValidator,
+//   handleValidationErrors,
+//   TasksController.create
+// );
+app.get("/tasks", async (req, res) => {
+  try {
+    const tasks = await Tasks.find({}, { taskNumber: 1, taskText: 1 });
+    res.json(tasks);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Не удалось получить список задач",
+    });
+  }
+});
+
+app.get("/users", async (req, res) => {
+  try {
+    const users = await User.find({}, { fullName: 1, _id: 0 }); 
+    res.json(users);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Не удалось получить список пользователей",
+    });
+  }
+});
+
+app.post("/user-id-by-fullname", UserController.getUserIdByFullName);
+
+app.post("/user-tasks", checkAuth, async (req, res) => {
+  try {
+    const { mark, outputData, codeText, user_id, task_id } = req.body;
+    
+    // Создание новой записи в таблице UserTasks
+    const newUserTask = new UserTasks({
+      mark,
+      outputData,
+      codeText,
+      user_id,
+      task_id,
+    });
+
+    // Сохранение записи в базе данных
+    await newUserTask.save();
+
+    res.status(201).json({ message: "Запись успешно создана" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Ошибка при создании записи" });
+  }
+});
+
 app.get("/tasksAll", async (req, res) => {
   try {
     // Получаем все задачи из базы данных
@@ -134,7 +184,10 @@ app.post(
   UserTasksController.create
 );
 
-app.listen(4444, (err) => {
+
+
+
+app.listen(4445, (err) => {
   if (err) {
     return console.log(err);
   }

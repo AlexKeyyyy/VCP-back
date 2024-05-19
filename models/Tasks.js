@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const TasksSchema = new mongoose.Schema(
   {
+    taskNumber: {
+      type: Number,
+      required: true
+    },
     taskText: {
       type: String,
       required: true,

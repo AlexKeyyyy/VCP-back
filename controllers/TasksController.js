@@ -1,4 +1,5 @@
 import Tasks from "../models/Tasks.js";
+import { register } from './UserController.js';
 
 // export const getLastTags = async (req, res) => {
 //   try {
@@ -18,6 +19,7 @@ import Tasks from "../models/Tasks.js";
 export const create = async (req, res) => {
   try {
     const doc = new Tasks({
+      taskNumber: req.body.taskNumber,
       taskText: req.body.taskText,
       reference: req.body.reference,
       inputData: req.body.inputData,
