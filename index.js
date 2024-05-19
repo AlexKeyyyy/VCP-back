@@ -105,6 +105,8 @@ app.post("/user-id-by-fullname", async (req, res) => {
 app.post("/user-tasks", checkAuth, async (req, res) => {
   try {
     const { mark, outputData, codeText, user_id, task_id } = req.body;
+
+    console.log('Полученные данные:', req.body);
     
     // Создание новой записи в таблице UserTasks
     const newUserTask = new UserTasks({
@@ -124,6 +126,30 @@ app.post("/user-tasks", checkAuth, async (req, res) => {
     res.status(500).json({ message: "Ошибка при создании записи" });
   }
 });
+// app.post("/user-tasks", checkAuth, 
+// async (req, res) => {
+//   try {
+//     const { mark, outputData, codeText, user_id, task_id } = req.body;
+    
+//     // Создание новой записи в таблице UserTasks
+//     const newUserTask = new UserTasks({
+//       mark,
+//       outputData,
+//       codeText,
+//       user_id,
+//       task_id,
+//     });
+
+//     // Сохранение записи в базе данных
+//     await newUserTask.save();
+
+//     res.status(201).json({ message: "Запись успешно создана" });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Ошибка при создании записи" });
+//   }
+// }
+// );
 
 app.get("/tasksAll", async (req, res) => {
   try {
@@ -191,7 +217,7 @@ app.get("/tasks", async (req, res) => {
 });
 
 app.post(
-  "/user-tasks",
+  "/user-tasks2",
   checkAuth,
   userTasksCreateValidator,
   handleValidationErrors,

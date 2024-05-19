@@ -5,15 +5,16 @@ const TasksSchema = new mongoose.Schema(
     mark: {
       type: Number,
       default: 0,
+      required: false,
     },
     outputData: {
       type: Array,
       default: [],
-      required: true,
+      required: false,
     },
     codeText: {
       type: String,
-      required: true,
+      required: false,
     },
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
