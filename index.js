@@ -86,7 +86,21 @@ app.get("/users", async (req, res) => {
   }
 });
 
-app.post("/user-id-by-fullname", UserController.getUserIdByFullName);
+app.post("/user-id-by-fullname", async (req, res) => {
+  const { fullName } = req.body;
+
+  try {
+    const user = await User.findOne({ fullName });
+    if (user) {
+      res.json({ user_id: user._id });
+    } else {
+      res.status(404).json({ message: "Пользователь не найден" });
+    }
+  } catch (error) {
+    console.error("Ошибка при получении user_id:", error);
+    res.status(500).json({ message: "Ошибка при получении user_id" });
+  }
+});
 
 app.post("/user-tasks", checkAuth, async (req, res) => {
   try {
