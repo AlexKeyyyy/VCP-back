@@ -4,11 +4,11 @@ const TasksSchema = new mongoose.Schema(
   {
     taskNumber: {
       type: Number,
-      required: true
+      required: false,
     },
     taskText: {
       type: String,
-      required: true,
+      required: false,
     },
     reference: {
       type: String,
