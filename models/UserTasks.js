@@ -26,7 +26,11 @@ const TasksSchema = new mongoose.Schema(
       ref: "UserTasks",
       required: true,
     },
-    comment: {
+    commentAdmin: {
+      type: String,
+      required: false,
+    },
+    commentUser: {
       type: String,
       required: false,
     },

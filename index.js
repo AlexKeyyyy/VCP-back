@@ -335,17 +335,6 @@ app.get("/tasks", async (req, res) => {
     }
     const percentage = Math.round((correctCount / answer.length) * 100);
 
-    // if (answer.toString() === userAnswer.toString()) {
-    //   mark = 100;
-    //   res.json({
-    //     message: "Вы ответили правильно!",
-    //   });
-    // } else {
-    //   res.json({
-    //     message: "Вы ответили неправильно!",
-    //   });
-    // }
-
     res.json({ message: `Вы ответили правильно на ${percentage}% вопросов` });
 
     await UserTasks.updateOne(
@@ -368,6 +357,23 @@ app.post(
   handleValidationErrors,
   UserTasksController.create
 );
+
+// Получение заданий из UserTasks по которым есть mark
+app.get("/user-tasks-with-result/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const userTasks = await UserTasks.find({
+      user_id: userId,
+      mark: { $gt: 0 },
+    }).exec();
+    res.json(userTasks);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось получить список задач с оценкой.",
+    });
+  }
+});
 
 app.listen(process.env.PORT, (err) => {
   if (err) {
