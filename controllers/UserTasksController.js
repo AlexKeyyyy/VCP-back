@@ -1,4 +1,5 @@
 import UserTasks from "../models/UserTasks.js";
+import Tasks from "../models/Tasks.js";
 
 export const create = async (req, res) => {
   try {
@@ -96,9 +97,23 @@ export const getAll = async (req, res) => {
     const userId = req.params.id;
 
     // Получаем все задачи из базы данных UserTasks с указанным user_id
-    const tasks = await UserTasks.find({ user_id: userId }).exec();
+    const userTasks = await UserTasks.find({ user_id: userId }).exec();
 
-    res.json(tasks);
+    // Получаем task_ids из userTasks
+    const taskIds = userTasks.map((userTask) => userTask.task_id);
+
+    // Используем Promise.all для параллельного выполнения всех запросов
+    const tasks = await Promise.all(
+      taskIds.map(async (taskId) => {
+        const task = await Tasks.findById(taskId).select("taskNumber").exec();
+        return task ? task.taskNumber : null;
+      })
+    );
+
+    // Убираем null значения на случай, если task не был найден
+    const taskNumbers = tasks.filter((taskNumber) => taskNumber !== null);
+
+    res.json(taskNumbers);
   } catch (error) {
     console.error(error);
     res.status(500).json({
