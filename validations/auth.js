@@ -24,12 +24,19 @@ export const userTasksCreateValidator = [
 ];
 
 export const tasksCreateValidator = [
-  body("taskText", "Введите задание").isLength({ min: 5 }).isString(),
-  body("reference", "Введите эталонный код").isLength({ min: 10 }).isString(),
-  body("inputData", "Введите тестировочные входные данные").isLength({
+  body("taskText", "Длина задания должна быть не менее 5 символов!")
+    .isLength({ min: 5 })
+    .isString(),
+  body("taskNumber", "Номер задания должен быть положительным числом!").isInt({
     min: 1,
   }),
-  body("outputData", "Введите тестировочные выходные данные").isLength({
-    min: 1,
-  }),
+  //   body("reference", "Введите эталонный код").isLength({ min: 10 }).isString(),
+  //   body("inputData", "Введите тестировочные входные данные").isLength({
+  //     min: 1,
+  //   }),
+  //   body("outputData", "Введите тестировочные выходные данные").isLength({
+  //     min: 1,
+  //   }
+  // )
+  // ,
 ];
