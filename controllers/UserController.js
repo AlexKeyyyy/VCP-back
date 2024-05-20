@@ -130,7 +130,10 @@ export const getUserIdByFullName = async (req, res) => {
 export const editProfile = async (req, res) => {
   try {
     const userId = req.params.id;
+    console.log("User ID:", userId); // Добавляем лог для проверки userId
+
     let updateData = req.body;
+    console.log("Update Data:", updateData); // Добавляем лог для проверки updateData
 
     if (updateData.password) {
       // Хеширование нового пароля
@@ -140,10 +143,12 @@ export const editProfile = async (req, res) => {
       // Заменяем пароль в объекте updateData на его хеш
       updateData = { ...updateData, passwordHash };
     }
-    console.log(userId);
+
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
     });
+
+    console.log("Updated User:", updatedUser); // Добавляем лог для проверки обновленного пользователя
 
     if (!updatedUser) {
       return res.status(404).json({ message: "Пользователь не найден" });
