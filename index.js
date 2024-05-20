@@ -198,8 +198,25 @@ app.post("/user-tasks", checkAuth, async (req, res) => {
 // Получение всех заданий из Tasks
 app.get("/tasksAll", async (req, res) => {
   try {
-    // Получаем все задачи из базы данных
+    const userId = req.params.id;
     const tasks = await Tasks.find().exec();
+    res.json(tasks);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось получить список задач.",
+    });
+  }
+});
+
+// Получаение всех заданий из UserTasks по user_id
+app.get("/all-user-tasks/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Получаем все задачи из базы данных UserTasks с указанным user_id
+    const tasks = await UserTasks.find({ user_id: userId }).exec();
+
     res.json(tasks);
   } catch (error) {
     console.error(error);
