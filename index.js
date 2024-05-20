@@ -121,6 +121,18 @@ app.put("/tasks/:id", (req, res) => {
     });
 });
 
+// Удаление задания из БД Tasks
+app.delete("/tasks/:id", (req, res) => {
+  const taskId = req.params.id;
+  Tasks.findByIdAndDelete(taskId)
+    .then(() => {
+      res.status(200).json({ message: "Задание успешно удалено" });
+    })
+    .catch((error) => {
+      res.status(500).json({ message: "Ошибка при удалении задания", error });
+    });
+});
+
 // Получение задания по номеру
 app.get("/tasks", async (req, res) => {
   try {
