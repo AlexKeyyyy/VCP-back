@@ -4,25 +4,25 @@ const TasksSchema = new mongoose.Schema(
   {
     taskNumber: {
       type: Number,
-      required: false,
+      required: true,
     },
     taskText: {
       type: String,
-      required: false,
+      required: true,
     },
     reference: {
       type: String,
-      required: true,
+      required: false,
     },
     inputData: {
       type: Array,
       default: [],
-      required: true,
+      required: false,
     },
     outputData: {
       type: Array,
       default: [],
-      required: true,
+      required: false,
     },
   },
   {
