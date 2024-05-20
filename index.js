@@ -27,17 +27,6 @@ mongoose
 
 const app = express();
 
-// const storage = multer.diskStorage({
-//   destination: (_, __, cb) => {
-//     cb(null, "uploads");
-//   },
-//   filename: (_, file, cb) => {
-//     cb(null, file.originalname);
-//   },
-// });
-
-//const upload = multer({ storage });
-
 app.use(express.json());
 app.use(cors());
 app.use("/uploads", express.static("uploads"));
@@ -148,7 +137,7 @@ app.get("/tasks", async (req, res) => {
 // Получение пользователя по fullName????
 app.get("/users", async (req, res) => {
   try {
-    const users = await User.find({}, { fullName: 1, _id: 0 });
+    const users = await User.find({ role: "user" }, { fullName: 1, _id: 0 });
     res.json(users);
   } catch (err) {
     console.log(err);
