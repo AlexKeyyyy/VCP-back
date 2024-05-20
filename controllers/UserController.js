@@ -19,6 +19,8 @@ export const register = async (req, res) => {
 
     if (admin) {
       doc.role = "admin";
+    } else {
+      doc.role = "user";
     }
 
     const user = await doc.save();
@@ -89,6 +91,7 @@ export const login = async (req, res) => {
     });
   }
 };
+
 
 export const getMe = async (req, res) => {
   try {
