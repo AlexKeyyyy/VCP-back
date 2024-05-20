@@ -108,11 +108,11 @@ app.post(
 );
 
 // Редактирование задания в Tasks
-app.put("/tasks/:id", (req, res) => {
+app.put("/tasks/:id", async (req, res) => {
   const taskId = req.params.id;
   const updatedTask = req.body; // Тело запроса содержит новые значения полей задания
 
-  Tasks.findByIdAndUpdate(taskId, updatedTask)
+  await Tasks.findByIdAndUpdate(taskId, updatedTask)
     .then(() => {
       res.status(200).json({ message: "Задание успешно обновлено" });
     })
@@ -122,9 +122,9 @@ app.put("/tasks/:id", (req, res) => {
 });
 
 // Удаление задания из БД Tasks
-app.delete("/tasks/:id", (req, res) => {
+app.delete("/tasks/:id", async (req, res) => {
   const taskId = req.params.id;
-  Tasks.findByIdAndDelete(taskId)
+  await Tasks.findByIdAndDelete(taskId)
     .then(() => {
       res.status(200).json({ message: "Задание успешно удалено" });
     })
@@ -253,6 +253,56 @@ app.get("/all-user-tasks/:id", async (req, res) => {
     console.error(error);
     res.status(500).json({
       message: "Не удалось получить список задач.",
+    });
+  }
+});
+
+// Получение задания из UserTasks по task_id и user_id
+app.get("/user-task/:id/:taskId", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const taskId = req.params.taskId;
+
+    const task = await UserTasks.findOne({
+      user_id: userId,
+      task_id: taskId,
+    }).exec();
+
+    res.json(task);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось получить задачу.",
+    });
+  }
+});
+
+// Сохранение задания и отправка на проверку по user_id и task_id
+app.patch("/user-task/:id/:taskId", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const taskId = req.params.taskId;
+
+    const { outputData, codeText } = req.body;
+
+    const task = await UserTasks.findOne({
+      user_id: userId,
+      task_id: taskId,
+    }).exec();
+
+    if (outputData) {
+      task.outputData = outputData;
+    }
+
+    task.codeText = codeText;
+
+    await task.save();
+
+    res.json({ message: "Задача успешно обновлена" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось обновить задачу.",
     });
   }
 });
