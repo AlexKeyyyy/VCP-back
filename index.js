@@ -277,35 +277,8 @@ app.get("/user-task/:id/:taskId", async (req, res) => {
   }
 });
 
-// Сохранение задания и отправка на проверку по user_id и task_id
-app.patch("/user-task/:id/:taskId", async (req, res) => {
-  try {
-    const userId = req.params.id;
-    const taskId = req.params.taskId;
-
-    const { outputData, codeText } = req.body;
-
-    const task = await UserTasks.findOne({
-      user_id: userId,
-      task_id: taskId,
-    }).exec();
-
-    if (outputData) {
-      task.outputData = outputData;
-    }
-
-    task.codeText = codeText;
-
-    await task.save();
-
-    res.json({ message: "Задача успешно обновлена" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Не удалось обновить задачу.",
-    });
-  }
-});
+// Сохранение задания и отправка на проверку по user_id и task_id + отправка комментария пользователем админу
+app.patch("/user-task/:id/:taskId", UserTasksController.update);
 
 // Оценка пользователя исходя из задания и его id
 app.get("/tasks", async (req, res) => {
@@ -359,21 +332,7 @@ app.post(
 );
 
 // Получение заданий из UserTasks по которым есть mark
-app.get("/user-tasks-with-result/:id", async (req, res) => {
-  try {
-    const userId = req.params.id;
-    const userTasks = await UserTasks.find({
-      user_id: userId,
-      mark: { $gt: 0 },
-    }).exec();
-    res.json(userTasks);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Не удалось получить список задач с оценкой.",
-    });
-  }
-});
+app.get("/user-tasks-with-mark/:id", UserTasksController.getAllWithMark);
 
 app.listen(process.env.PORT, (err) => {
   if (err) {
