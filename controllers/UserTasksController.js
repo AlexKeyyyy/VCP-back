@@ -71,3 +71,38 @@ export const update = async (req, res) => {
     });
   }
 };
+
+export const getOne = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const taskId = req.params.taskId;
+
+    const task = await UserTasks.findOne({
+      user_id: userId,
+      task_id: taskId,
+    }).exec();
+
+    res.json(task);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось получить задачу.",
+    });
+  }
+};
+
+export const getAll = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Получаем все задачи из базы данных UserTasks с указанным user_id
+    const tasks = await UserTasks.find({ user_id: userId }).exec();
+
+    res.json(tasks);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось получить список задач.",
+    });
+  }
+};

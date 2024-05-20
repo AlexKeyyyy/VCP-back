@@ -92,7 +92,6 @@ export const login = async (req, res) => {
   }
 };
 
-
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.userId);
@@ -125,5 +124,37 @@ export const getUserIdByFullName = async (req, res) => {
   } catch (error) {
     console.error("Ошибка при получении user_id:", error);
     res.status(500).json({ message: "Ошибка при получении user_id" });
+  }
+};
+
+export const editProfile = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    let updateData = req.body;
+
+    if (updateData.password) {
+      // Хеширование нового пароля
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(updateData.password, salt);
+
+      // Заменяем пароль в объекте updateData на его хеш
+      updateData = { ...updateData, passwordHash };
+    }
+    console.log(userId);
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "Пользователь не найден" });
+    }
+
+    // Отправьте обновленные данные пользователя в ответе
+    res.json(updatedUser);
+  } catch (err) {
+    console.log(err);
+    res
+      .status(500)
+      .json({ message: "Не удалось обновить данные пользователя" });
   }
 };

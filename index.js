@@ -31,6 +31,8 @@ app.use(express.json());
 app.use(cors());
 app.use("/uploads", express.static("uploads"));
 
+// USER
+
 // Логин
 app.post(
   "/auth/login",
@@ -48,37 +50,7 @@ app.post(
 );
 
 // Редактирование профиля пользователя
-app.put("/user/:id", async (req, res) => {
-  try {
-    const userId = req.params.id;
-    let updateData = req.body;
-
-    if (updateData.password) {
-      // Хеширование нового пароля
-      const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash(updateData.password, salt);
-
-      // Заменяем пароль в объекте updateData на его хеш
-      updateData = { ...updateData, passwordHash };
-    }
-    console.log(userId);
-    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
-      new: true,
-    });
-
-    if (!updatedUser) {
-      return res.status(404).json({ message: "Пользователь не найден" });
-    }
-
-    // Отправьте обновленные данные пользователя в ответе
-    res.json(updatedUser);
-  } catch (err) {
-    console.log(err);
-    res
-      .status(500)
-      .json({ message: "Не удалось обновить данные пользователя" });
-  }
-});
+app.put("/user/:id", UserController.editProfile);
 
 // Хз что это
 app.get("/auth/me", checkAuth, UserController.getMe);
@@ -241,41 +213,10 @@ app.get("/tasksAll", async (req, res) => {
 });
 
 // Получаение всех заданий из UserTasks по user_id
-app.get("/all-user-tasks/:id", async (req, res) => {
-  try {
-    const userId = req.params.id;
-
-    // Получаем все задачи из базы данных UserTasks с указанным user_id
-    const tasks = await UserTasks.find({ user_id: userId }).exec();
-
-    res.json(tasks);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Не удалось получить список задач.",
-    });
-  }
-});
+app.get("/all-user-tasks/:id", UserTasksController.getAll);
 
 // Получение задания из UserTasks по task_id и user_id
-app.get("/user-task/:id/:taskId", async (req, res) => {
-  try {
-    const userId = req.params.id;
-    const taskId = req.params.taskId;
-
-    const task = await UserTasks.findOne({
-      user_id: userId,
-      task_id: taskId,
-    }).exec();
-
-    res.json(task);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Не удалось получить задачу.",
-    });
-  }
-});
+app.get("/user-task/:id/:taskId", UserTasksController.getOne);
 
 // Сохранение задания и отправка на проверку по user_id и task_id + отправка комментария пользователем админу
 app.patch("/user-task/:id/:taskId", UserTasksController.update);
