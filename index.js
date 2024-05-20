@@ -49,6 +49,7 @@ app.post(
   handleValidationErrors,
   UserController.login
 );
+
 // Регистрация
 app.post(
   "/auth/register",
@@ -96,6 +97,15 @@ app.get("/auth/me", checkAuth, UserController.getMe);
 // Создание нового задания
 app.post(
   "/tasks-create",
+  checkAuth,
+  tasksCreateValidator,
+  handleValidationErrors,
+  TasksController.create
+);
+
+// Редактирование задания в Tasks
+app.post(
+  "/tasks-update",
   checkAuth,
   tasksCreateValidator,
   handleValidationErrors,
