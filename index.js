@@ -94,6 +94,21 @@ app.put("/user/:id", async (req, res) => {
 // Хз что это
 app.get("/auth/me", checkAuth, UserController.getMe);
 
+// Получение роли пользователя
+app.get("/role", async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(404).json({ message: "Пользователь не найден" });
+    }
+
+    res.json(user.role);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Не удалось получить роль пользователя" });
+  }
+});
+
 // Создание нового задания
 app.post(
   "/tasks-create",
@@ -104,13 +119,18 @@ app.post(
 );
 
 // Редактирование задания в Tasks
-app.post(
-  "/tasks-update",
-  checkAuth,
-  tasksCreateValidator,
-  handleValidationErrors,
-  TasksController.create
-);
+app.put("/tasks/:id", (req, res) => {
+  const taskId = req.params.id;
+  const updatedTask = req.body; // Тело запроса содержит новые значения полей задания
+
+  Tasks.findByIdAndUpdate(taskId, updatedTask)
+    .then(() => {
+      res.status(200).json({ message: "Задание успешно обновлено" });
+    })
+    .catch((error) => {
+      res.status(500).json({ message: "Ошибка при обновлении задания", error });
+    });
+});
 
 // Получение задания по номеру
 app.get("/tasks", async (req, res) => {
