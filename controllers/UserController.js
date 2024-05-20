@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import User from "../models/User.js";
+import Admin from "../models/Admin.js";
 import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
@@ -13,6 +14,12 @@ export const register = async (req, res) => {
       email: req.body.email,
       passwordHash: hash,
     });
+
+    const admin = await Admin.findOne({ email: req.body.email });
+
+    if (admin) {
+      doc.role = "admin";
+    }
 
     const user = await doc.save();
 

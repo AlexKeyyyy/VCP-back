@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 import {
   registerValidator,
   userTasksCreateValidator,
@@ -16,11 +17,11 @@ import cors from "cors";
 import Tasks from "./models/Tasks.js";
 import UserTasks from "./models/UserTasks.js";
 import User from "./models/User.js";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 mongoose
-  .connect(
-    "mongodb+srv://alexykoba:u0PQW4fxB2mHUtb9@cluster0.rpznl0k.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-  )
+  .connect(process.env.DB_URL)
   .then(() => console.log("DB ok"))
   .catch((err) => console.log("BD error", err));
 
@@ -41,27 +42,67 @@ app.use(express.json());
 app.use(cors());
 app.use("/uploads", express.static("uploads"));
 
+// Логин
 app.post(
   "/auth/login",
   loginValidator,
   handleValidationErrors,
   UserController.login
 );
+// Регистрация
 app.post(
   "/auth/register",
   registerValidator,
   handleValidationErrors,
   UserController.register
 );
+
+// Редактирование профиля пользователя
+app.put("/user/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    let updateData = req.body;
+
+    if (updateData.password) {
+      // Хеширование нового пароля
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(updateData.password, salt);
+
+      // Заменяем пароль в объекте updateData на его хеш
+      updateData = { ...updateData, passwordHash };
+    }
+    console.log(userId);
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "Пользователь не найден" });
+    }
+
+    // Отправьте обновленные данные пользователя в ответе
+    res.json(updatedUser);
+  } catch (err) {
+    console.log(err);
+    res
+      .status(500)
+      .json({ message: "Не удалось обновить данные пользователя" });
+  }
+});
+
+// Хз что это
 app.get("/auth/me", checkAuth, UserController.getMe);
 
-// app.post(
-//   "/tasks",
-//   checkAuth,
-//   tasksCreateValidator,
-//   handleValidationErrors,
-//   TasksController.create
-// );
+// Создание нового задания
+app.post(
+  "/tasks-create",
+  checkAuth,
+  tasksCreateValidator,
+  handleValidationErrors,
+  TasksController.create
+);
+
+// Получение задания по номеру
 app.get("/tasks", async (req, res) => {
   try {
     const tasks = await Tasks.find({}, { taskNumber: 1, taskText: 1 });
@@ -74,9 +115,10 @@ app.get("/tasks", async (req, res) => {
   }
 });
 
+// Получение пользователя по fullName????
 app.get("/users", async (req, res) => {
   try {
-    const users = await User.find({}, { fullName: 1, _id: 0 }); 
+    const users = await User.find({}, { fullName: 1, _id: 0 });
     res.json(users);
   } catch (err) {
     console.log(err);
@@ -86,6 +128,7 @@ app.get("/users", async (req, res) => {
   }
 });
 
+// Получение пользователя по fullName
 app.post("/user-id-by-fullname", async (req, res) => {
   const { fullName } = req.body;
 
@@ -102,12 +145,13 @@ app.post("/user-id-by-fullname", async (req, res) => {
   }
 });
 
+// Это что такое....
 app.post("/user-tasks", checkAuth, async (req, res) => {
   try {
     const { mark, outputData, codeText, user_id, task_id } = req.body;
 
-    console.log('Полученные данные:', req.body);
-    
+    console.log("Полученные данные:", req.body);
+
     // Создание новой записи в таблице UserTasks
     const newUserTask = new UserTasks({
       mark,
@@ -126,11 +170,11 @@ app.post("/user-tasks", checkAuth, async (req, res) => {
     res.status(500).json({ message: "Ошибка при создании записи" });
   }
 });
-// app.post("/user-tasks", checkAuth, 
+// app.post("/user-tasks", checkAuth,
 // async (req, res) => {
 //   try {
 //     const { mark, outputData, codeText, user_id, task_id } = req.body;
-    
+
 //     // Создание новой записи в таблице UserTasks
 //     const newUserTask = new UserTasks({
 //       mark,
@@ -151,6 +195,7 @@ app.post("/user-tasks", checkAuth, async (req, res) => {
 // }
 // );
 
+// Получение всех заданий из Tasks
 app.get("/tasksAll", async (req, res) => {
   try {
     // Получаем все задачи из базы данных
@@ -164,6 +209,7 @@ app.get("/tasksAll", async (req, res) => {
   }
 });
 
+// Оценка пользователя исходя из задания и его id
 app.get("/tasks", async (req, res) => {
   try {
     const taskId = req.query.id;
@@ -216,6 +262,7 @@ app.get("/tasks", async (req, res) => {
   }
 });
 
+// Создание нового userTask
 app.post(
   "/user-tasks2",
   checkAuth,
@@ -224,12 +271,9 @@ app.post(
   UserTasksController.create
 );
 
-
-
-
-app.listen(4445, (err) => {
+app.listen(process.env.PORT, (err) => {
   if (err) {
     return console.log(err);
   }
-  console.log("Server is working");
+  console.log("Server is working on port ", process.env.PORT);
 });

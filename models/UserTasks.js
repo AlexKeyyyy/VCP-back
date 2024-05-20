@@ -26,6 +26,10 @@ const TasksSchema = new mongoose.Schema(
       ref: "UserTasks",
       required: true,
     },
+    comment: {
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,
