@@ -154,12 +154,10 @@ export const editProfile = async (req, res) => {
       return res.status(404).json({ message: "Пользователь не найден" });
     }
 
-    // Отправьте обновленные данные пользователя в ответе
+    // Отправляем обновленные данные пользователя в ответе
     res.json(updatedUser);
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ message: "Не удалось обновить данные пользователя" });
+    res.status(500).json({ message: "Не удалось обновить данные пользователя" });
   }
 };
