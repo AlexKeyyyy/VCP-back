@@ -105,15 +105,15 @@ export const getAll = async (req, res) => {
     // Используем Promise.all для параллельного выполнения всех запросов
     const tasks = await Promise.all(
       taskIds.map(async (taskId) => {
-        const task = await Tasks.findById(taskId).select("taskNumber").exec();
-        return task ? task.taskNumber : null;
+        const task = await Tasks.findById(taskId).select("taskNumber taskText").exec();
+        return task ? { _id: taskId, taskNumber: task.taskNumber, taskText: task.taskText } : null;
       })
     );
 
     // Убираем null значения на случай, если task не был найден
-    const taskNumbers = tasks.filter((taskNumber) => taskNumber !== null);
+    const validTasks = tasks.filter((task) => task !== null);
 
-    res.json(taskNumbers);
+    res.json(validTasks);
   } catch (error) {
     console.error(error);
     res.status(500).json({

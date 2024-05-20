@@ -212,6 +212,22 @@ app.get("/tasksAll", async (req, res) => {
   }
 });
 
+app.get("/task/:taskNumber", async (req, res) => {
+  try {
+    const taskNumber = req.params.taskNumber;
+    const task = await Tasks.findOne({ taskNumber: taskNumber }).exec();
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    res.json(task);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch task" });
+  }
+});
+
 // Получаение всех заданий из UserTasks по user_id
 app.get("/all-user-tasks/:id", UserTasksController.getAll);
 
