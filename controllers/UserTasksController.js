@@ -41,10 +41,10 @@ export const getAllWithMark = async (req, res) => {
 export const update = async (req, res) => {
   try {
     const userId = req.params.id;
-    const taskId = req.params.taskId;
+    const taskNumber = req.params.taskNumber;
 
-    const { outputData, codeText, commentUser } = req.body;
-
+    const { outputData, codeText } = req.body;
+    const taskId = await Tasks.findOne({ taskNumber: taskNumber }).exec();
     const task = await UserTasks.findOne({
       user_id: userId,
       task_id: taskId,
@@ -52,10 +52,6 @@ export const update = async (req, res) => {
 
     if (outputData) {
       task.outputData = outputData;
-    }
-
-    if (commentUser) {
-      task.commentUser = commentUser;
     }
 
     if (codeText) {
@@ -97,7 +93,10 @@ export const getAll = async (req, res) => {
     const userId = req.params.id;
 
     // Получаем все задачи из базы данных UserTasks с указанным user_id
-    const userTasks = await UserTasks.find({ user_id: userId }).exec();
+    const userTasks = await UserTasks.find({
+      user_id: userId,
+      done: "0",
+    }).exec();
 
     // Получаем task_ids из userTasks
     const taskIds = userTasks.map((userTask) => userTask.task_id);
@@ -105,8 +104,16 @@ export const getAll = async (req, res) => {
     // Используем Promise.all для параллельного выполнения всех запросов
     const tasks = await Promise.all(
       taskIds.map(async (taskId) => {
-        const task = await Tasks.findById(taskId).select("taskNumber taskText").exec();
-        return task ? { _id: taskId, taskNumber: task.taskNumber, taskText: task.taskText } : null;
+        const task = await Tasks.findById(taskId)
+          .select("taskNumber taskText")
+          .exec();
+        return task
+          ? {
+              _id: taskId,
+              taskNumber: task.taskNumber,
+              taskText: task.taskText,
+            }
+          : null;
       })
     );
 

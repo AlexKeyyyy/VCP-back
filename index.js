@@ -231,14 +231,14 @@ app.get("/task/:taskNumber", async (req, res) => {
   }
 });
 
-// Получаение всех заданий из UserTasks по user_id
+// Получаение всех заданий из UserTasks по user_id (невыполненные)
 app.get("/all-user-tasks/:id", UserTasksController.getAll);
 
 // Получение задания из UserTasks по task_id и user_id
 app.get("/user-task/:id/:taskId", UserTasksController.getOne);
 
-// Сохранение задания и отправка на проверку по user_id и task_id + отправка комментария пользователем админу
-app.patch("/user-task/:id/:taskId", UserTasksController.update);
+// Сохранение задания по user_id и task_id (сохранить)
+app.patch("/user-task-save/:id/:taskNumber", UserTasksController.update);
 
 // Оценка пользователя исходя из задания и его id
 app.get("/tasks", async (req, res) => {

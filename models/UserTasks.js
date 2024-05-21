@@ -34,6 +34,10 @@ const TasksSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    done: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
