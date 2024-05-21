@@ -13,7 +13,7 @@ const TasksSchema = new mongoose.Schema(
       required: false,
     },
     codeText: {
-      type: Text,
+      type: String,
       required: false,
     },
     user_id: {

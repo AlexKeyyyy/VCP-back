@@ -41,6 +41,8 @@ export const getAllWithMark = async (req, res) => {
 export const update = async (req, res) => {
   try {
     const userId = req.params.id;
+    console.log(userId);
+    
     const taskNumber = req.params.taskNumber;
 
     const { outputData, codeText } = req.body;
@@ -88,8 +90,9 @@ export const send = async (req, res) => {
     if (codeText) {
       task.codeText = codeText;
     }
-
+    console.log(task.done)
     task.done = 1;
+    console.log(task.done)
 
     await task.save();
 
