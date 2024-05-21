@@ -42,7 +42,7 @@ export const update = async (req, res) => {
   try {
     const userId = req.params.id;
     console.log(userId);
-    
+
     const taskNumber = req.params.taskNumber;
 
     const { outputData, codeText } = req.body;
@@ -78,11 +78,12 @@ export const send = async (req, res) => {
 
     const { outputData, codeText } = req.body;
     const taskId = await Tasks.findOne({ taskNumber: taskNumber }).exec();
+
     const task = await UserTasks.findOne({
       user_id: userId,
       task_id: taskId,
     }).exec();
-
+    console.log(taskId);
     if (outputData) {
       task.outputData = outputData;
     }
@@ -90,13 +91,13 @@ export const send = async (req, res) => {
     if (codeText) {
       task.codeText = codeText;
     }
-    console.log(task.done)
+    console.log(task.done);
     task.done = 1;
-    console.log(task.done)
+    console.log(task.done);
 
     await task.save();
 
-    res.json({ message: "Задача успешно отправлена на проверку" });
+    res.json(task.done);
   } catch (error) {
     console.error(error);
     res.status(500).json({
