@@ -69,6 +69,39 @@ export const update = async (req, res) => {
   }
 };
 
+export const send = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const taskNumber = req.params.taskNumber;
+
+    const { outputData, codeText } = req.body;
+    const taskId = await Tasks.findOne({ taskNumber: taskNumber }).exec();
+    const task = await UserTasks.findOne({
+      user_id: userId,
+      task_id: taskId,
+    }).exec();
+
+    if (outputData) {
+      task.outputData = outputData;
+    }
+
+    if (codeText) {
+      task.codeText = codeText;
+    }
+
+    task.done = 1;
+
+    await task.save();
+
+    res.json({ message: "Задача успешно отправлена на проверку" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось отправить задачу на проверку.",
+    });
+  }
+};
+
 export const getOne = async (req, res) => {
   try {
     const userId = req.params.id;

@@ -237,8 +237,11 @@ app.get("/all-user-tasks/:id", UserTasksController.getAll);
 // Получение задания из UserTasks по task_id и user_id
 app.get("/user-task/:id/:taskId", UserTasksController.getOne);
 
-// Сохранение задания по user_id и task_id (сохранить)
+// Сохранение задания по user_id и taskNumber (сохранить)
 app.patch("/user-task-save/:id/:taskNumber", UserTasksController.update);
+
+// Отправка задания на проверку по user_id и taskNumber (отправить решение)
+app.patch("/user-task-send/:id/:taskNumber", UserTasksController.send);
 
 // Оценка пользователя исходя из задания и его id
 app.get("/tasks", async (req, res) => {
