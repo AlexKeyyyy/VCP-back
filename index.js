@@ -52,6 +52,9 @@ app.post(
 // Редактирование профиля пользователя
 app.put("/user/:id", UserController.editProfile);
 
+// Получения данных пользователя для отображения в /account
+app.get("/user/:userId", UserController.getUser);
+
 // Хз что это
 app.get("/auth/me", checkAuth, UserController.getMe);
 

@@ -158,6 +158,22 @@ export const editProfile = async (req, res) => {
     res.json(updatedUser);
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Не удалось обновить данные пользователя" });
+    res
+      .status(500)
+      .json({ message: "Не удалось обновить данные пользователя" });
+  }
+};
+
+export const getUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId).select("fullName email");
+    if (!user) {
+      return res.status(404).json({ message: "Пользователь не найден" });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Ошибка сервера" });
   }
 };
