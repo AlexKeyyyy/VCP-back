@@ -243,6 +243,9 @@ app.patch("/user-task-save/:id/:taskNumber", UserTasksController.update);
 // Отправка задания на проверку по user_id и taskNumber (отправить решение)
 app.patch("/user-task-send/:id/:taskNumber", UserTasksController.send);
 
+// Получение done по user_id и taskNumber (для кнопОЧКИ)
+app.get("/user-task-getDone/:id/:taskNumber", UserTasksController.getDone);
+
 // Оценка пользователя исходя из задания и его id
 app.get("/tasks", async (req, res) => {
   try {

@@ -106,6 +106,27 @@ export const send = async (req, res) => {
   }
 };
 
+export const getDone = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const taskNumber = req.params.taskNumber;
+
+    const taskId = await Tasks.findOne({ taskNumber: taskNumber }).exec();
+
+    const task = await UserTasks.findOne({
+      user_id: userId,
+      task_id: taskId,
+    }).exec();
+
+    res.json(task.done);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось вернуть done.",
+    });
+  }
+};
+
 export const getOne = async (req, res) => {
   try {
     const userId = req.params.id;
