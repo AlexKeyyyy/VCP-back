@@ -2,7 +2,7 @@ import UserTasks from "../models/UserTasks.js";
 import Tasks from "../models/Tasks.js";
 import User from "../models/User.js";
 import moment from "moment-timezone";
-import Admin from "../models/Admin.js";
+import PDFDocument from "pdfkit";
 
 export const create = async (req, res) => {
   try {
@@ -421,6 +421,95 @@ export const commentAdmin = async (req, res) => {
     console.error(error);
     res.status(500).json({
       message: "Не удалось отправить сообщение.",
+    });
+  }
+};
+
+export const makeReport = async (req, res) => {
+  try {
+    // Получаем все задачи пользователей
+    const userTasks = await UserTasks.find();
+
+    // Извлекаем уникальные user_id из задач
+    const userIds = [...new Set(userTasks.map((task) => task.user_id))];
+
+    // Получаем пользователей по userIds
+    const users = await User.find({ _id: { $in: userIds } });
+
+    // Группируем задачи по пользователю
+    const userTaskMap = userTasks.reduce((acc, task) => {
+      if (!acc[task.user_id]) {
+        acc[task.user_id] = [];
+      }
+      acc[task.user_id].push(task);
+      return acc;
+    }, {});
+
+    // Создаем новый PDF документ
+    const doc = new PDFDocument();
+    const fontPath = "OpenSans_Condensed-Medium.ttf"; // Укажите путь к вашему файлу шрифта
+    doc.registerFont("OpenSans", fontPath);
+    doc.font("OpenSans");
+    let buffers = [];
+    doc.on("data", buffers.push.bind(buffers));
+    doc.on("end", () => {
+      let pdfData = Buffer.concat(buffers);
+      res
+        .writeHead(200, {
+          "Content-Length": Buffer.byteLength(pdfData),
+          "Content-Type": "application/pdf",
+          "Content-Disposition": "attachment;filename=report.pdf",
+        })
+        .end(pdfData);
+    });
+
+    // Генерируем отчет для каждого пользователя
+    // users.forEach((user) => {
+    //   const tasks = userTaskMap[user._id] || [];
+    //   const totalTasks = tasks.length;
+    //   const completedTasks = tasks.filter((task) => task.done === 1).length;
+    //   const completionRate =
+    //     totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100;
+
+    //   // Добавляем данные пользователя в PDF
+    //   doc.fontSize(14).text(`Кандидат: ${user.fullName} (${user.email})`, {
+    //     underline: true,
+    //   });
+    //   doc.fontSize(12).text(`Total Tasks: ${totalTasks}`);
+    //   doc.fontSize(12).text(`Completed Tasks: ${completedTasks}`);
+    //   doc.fontSize(12).text(`Completion Rate: ${completionRate.toFixed(2)}%`);
+    //   doc.moveDown();
+    // });
+
+    users.forEach((user) => {
+      const tasks = userTaskMap[user._id] || [];
+      const totalTasks = tasks.length;
+      const totalMarks = tasks.reduce(
+        (sum, task) => sum + (task.mark > 0 ? task.mark : 0),
+        0
+      );
+      const maxPossibleMarks = totalTasks * 10;
+      const completionRate =
+        maxPossibleMarks === 0 ? 0 : (totalMarks / maxPossibleMarks) * 100;
+
+      // Добавляем данные пользователя в PDF
+      doc.fontSize(14).text(`Кандидат: ${user.fullName} (${user.email})`, {
+        underline: true,
+      });
+      doc.fontSize(12).text(`Всего заданий: ${totalTasks}`);
+      doc.fontSize(12).text(`Суммарная оценка: ${totalMarks}`);
+      doc
+        .fontSize(12)
+        .text(`Процент выполнения: ${completionRate.toFixed(2)}%`);
+      doc.moveDown();
+    });
+
+    // Заканчиваем PDF документ
+    doc.end();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Failed to generate report.",
     });
   }
 };

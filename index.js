@@ -281,6 +281,9 @@ app.patch(
   UserTasksController.commentAdmin
 );
 
+// Отправка отчета
+app.get("/make-report", UserTasksController.makeReport);
+
 // Оценка пользователя исходя из задания и его id
 // app.get("/tasks", async (req, res) => {
 //   try {
