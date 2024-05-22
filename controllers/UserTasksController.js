@@ -209,3 +209,27 @@ export const getCode = async (req, res) => {
     });
   }
 };
+
+export const getAllDone = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const doneTasks = await UserTasks.find({ user_id: userId, done: "1" });
+
+    // Выполняем поиск всех номеров задач (TaskNumber), связанных с выполными задачами
+    const tasksNumbers = await Tasks.find(
+      { _id: { $in: doneTasks.map((task) => task.task_id) } },
+      { taskNumber: 1 }
+    );
+
+    // Теперь в переменной tasksNumbers у нас массив объектов, каждый из которых содержит только номер задачи (TaskNumber)
+    // Вы можете преобразова этот массив в плоский массив номеров задач, используя метод map
+    const allTaskNumbers = tasksNumbers.map((task) => task.taskNumber);
+    res.status(200).json(allTaskNumbers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось получить список задач.",
+    });
+  }
+};
