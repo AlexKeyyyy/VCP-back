@@ -97,8 +97,8 @@ export const send = async (req, res) => {
     console.log(task.done);
     task.done = 1;
     console.log(task.done);
-    task.doneAt =
-      moment().tz("Europe/Moscow").format("YYYY-MM-DDTHH:mm:ss") + "Z";
+    task.doneAt = new Date();
+    //moment().tz("Europe/Moscow").format("YYYY-MM-DDTHH:mm:ss") + "Z";
 
     await task.save();
 
@@ -304,8 +304,8 @@ export const commentUser = async (req, res) => {
 
     const comment = {
       message,
-      timestamp:
-        moment().tz("Europe/Moscow").format("YYYY-MM-DDTHH:mm:ss") + "Z",
+      timestamp: new Date(),
+      //moment().tz("Europe/Moscow").format("YYYY-MM-DDTHH:mm:ss") + "Z",
     };
     //console.log(admin.email === user.email);
     // if (admin) {
