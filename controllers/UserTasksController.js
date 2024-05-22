@@ -328,3 +328,39 @@ export const commentUser = async (req, res) => {
     });
   }
 };
+
+export const getAllResult = async (req, res) => {
+  try {
+    const results = await UserTasks.find({ done: "1" });
+
+    const taskIds = results.map((task) => task.task_id);
+    const userIds = results.map((task) => task.user_id);
+
+    const taskNumbers = await Tasks.find({ _id: { $in: taskIds } });
+    const users = await User.find({ _id: { $in: userIds } });
+
+    const taskNumbersMap = taskNumbers.reduce((acc, task) => {
+      acc[task._id] = task.taskNumber;
+      return acc;
+    }, {});
+
+    const usersMap = users.reduce((acc, user) => {
+      acc[user._id] = user.fullName;
+      return acc;
+    }, {});
+
+    const response = results.map((result) => ({
+      doneAt: result.doneAt,
+      fullName: usersMap[result.user_id],
+      user_id: result.user_id,
+      taskNumber: taskNumbersMap[result.task_id],
+    }));
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось получить все результаты.",
+    });
+  }
+};

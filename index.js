@@ -262,6 +262,9 @@ app.patch(
   UserTasksController.commentUser
 );
 
+// РЕЗУЛЬТАТЫ (Admin)
+app.get("/get-result-admin", UserTasksController.getAllResult);
+
 // Оценка пользователя исходя из задания и его id
 // app.get("/tasks", async (req, res) => {
 //   try {
