@@ -364,3 +364,31 @@ export const getAllResult = async (req, res) => {
     });
   }
 };
+
+export const setMark = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const taskNumber = req.params.taskNumber;
+
+    const { mark } = req.body;
+    const taskId = await Tasks.findOne({ taskNumber: taskNumber }).exec();
+    const task = await UserTasks.findOne({
+      user_id: userId,
+      task_id: taskId,
+    }).exec();
+
+    if (mark) {
+      task.mark = mark;
+    }
+
+    await task.save();
+
+    res.status(200).json({ message: "Задача успешно оценена." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось оценить задание.",
+    });
+  }
+};
