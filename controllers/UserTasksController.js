@@ -392,3 +392,35 @@ export const setMark = async (req, res) => {
     });
   }
 };
+
+export const commentAdmin = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const taskNumber = req.params.taskNumber;
+
+    const { message } = req.body;
+    const taskId = await Tasks.findOne({ taskNumber: taskNumber }).exec();
+    const task = await UserTasks.findOne({
+      user_id: userId,
+      task_id: taskId,
+    }).exec();
+
+    const comment = {
+      message,
+      timestamp: new Date(),
+      //moment().tz("Europe/Moscow").format("YYYY-MM-DDTHH:mm:ss") + "Z",
+    };
+
+    task.commentAdmin.push(comment);
+
+    await task.save();
+
+    res.status(200).json({ message: "Комментарий успешно отправлен." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось отправить сообщение.",
+    });
+  }
+};

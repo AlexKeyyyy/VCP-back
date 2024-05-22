@@ -275,6 +275,12 @@ app.get(
 // Оценивание задания админом по user_id и taskNumber
 app.patch("/set-mark/:userId/:taskNumber", UserTasksController.setMark);
 
+// Комментирование задания админом по user_id и taskNumber
+app.patch(
+  "/comment-admin/:userId/:taskNumber",
+  UserTasksController.commentAdmin
+);
+
 // Оценка пользователя исходя из задания и его id
 // app.get("/tasks", async (req, res) => {
 //   try {
