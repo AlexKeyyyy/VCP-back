@@ -246,6 +246,9 @@ app.patch("/user-task-send/:id/:taskNumber", UserTasksController.send);
 // Получение done по user_id и taskNumber (для кнопОЧКИ)
 app.get("/user-task-getDone/:id/:taskNumber", UserTasksController.getDone);
 
+// Получение кода при загрузке страницы
+app.get("/user-taskk/:id/:taskNumber", UserTasksController.getCode);
+
 // Оценка пользователя исходя из задания и его id
 app.get("/tasks", async (req, res) => {
   try {

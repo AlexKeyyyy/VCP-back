@@ -186,3 +186,26 @@ export const getAll = async (req, res) => {
     });
   }
 };
+
+export const getCode = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const taskNumber = req.params.taskNumber;
+
+    const taskId = await Tasks.findOne({ taskNumber: taskNumber }).exec();
+
+    const task = await UserTasks.findOne({
+      user_id: userId,
+      task_id: taskId,
+    }).exec();
+
+    console.log(task);
+
+    res.json({ codeText: task.codeText });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось получить код.",
+    });
+  }
+};
