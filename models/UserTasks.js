@@ -4,8 +4,10 @@ const TasksSchema = new mongoose.Schema(
   {
     mark: {
       type: Number,
-      default: 0,
+      default: -1,
       required: false,
+      min: -1,
+      max: 10,
     },
     outputData: {
       type: Array,
