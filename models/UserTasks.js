@@ -29,11 +29,21 @@ const TasksSchema = new mongoose.Schema(
       required: true,
     },
     commentAdmin: {
-      type: String,
+      type: [
+        {
+          message: { type: String, required: true },
+          timestamp: { type: Date, default: Date.now },
+        },
+      ],
       required: false,
     },
     commentUser: {
-      type: String,
+      type: [
+        {
+          message: { type: String, required: true },
+          timestamp: { type: Date, default: Date.now },
+        },
+      ],
       required: false,
     },
     done: {

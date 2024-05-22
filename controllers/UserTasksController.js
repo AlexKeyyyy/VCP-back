@@ -2,6 +2,7 @@ import UserTasks from "../models/UserTasks.js";
 import Tasks from "../models/Tasks.js";
 import User from "../models/User.js";
 import moment from "moment-timezone";
+import Admin from "../models/Admin.js";
 
 export const create = async (req, res) => {
   try {
@@ -253,6 +254,7 @@ export const getResult = async (req, res) => {
     const user = await User.findById(userId).exec();
 
     res.json({
+      taskText: taskId.taskText,
       codeText: task.codeText,
       commentAdmin: task.commentAdmin,
       commentUser: task.commentUser,
@@ -263,6 +265,48 @@ export const getResult = async (req, res) => {
     console.error(error);
     res.status(500).json({
       message: "Не удалось получить результат.",
+    });
+  }
+};
+
+export const comment = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const taskNumber = req.params.taskNumber;
+    const { message } = req.body;
+
+    const user = await User.findById(userId).exec();
+
+    const admin = await Admin.findOne({ email: user.email }).exec();
+
+    const taskId = await Tasks.findOne({ taskNumber: taskNumber }).exec();
+
+    const task = await UserTasks.findOne({
+      user_id: userId,
+      task_id: taskId,
+    }).exec();
+
+    const comment = {
+      message,
+      timestamp:
+        moment().tz("Europe/Moscow").format("YYYY-MM-DDTHH:mm:ss") + "Z",
+    };
+    console.log(admin);
+    if (admin.email === user.email) {
+      task.commentAdmin.push(comment);
+    } else {
+      task.commentUser.push(comment);
+    }
+
+    await task.save();
+
+    res.status(200).json({
+      message: "Комментарий успешно добавлен",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось отправить сообщение.",
     });
   }
 };

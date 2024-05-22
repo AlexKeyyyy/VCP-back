@@ -256,6 +256,12 @@ app.get("/get-done-tasks/:userId", UserTasksController.getAllDone);
 // Получение выполненного задания из UserTasks по user_id  и taskNumber
 app.get("/get-result-data/:userId/:taskNumber", UserTasksController.getResult);
 
+// Отправка комментрия пользователем по user_id и taskNumber
+app.patch(
+  "/user-task-comment/:userId/:taskNumber",
+  UserTasksController.comment
+);
+
 // Оценка пользователя исходя из задания и его id
 // app.get("/tasks", async (req, res) => {
 //   try {
