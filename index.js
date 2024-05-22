@@ -263,7 +263,14 @@ app.patch(
 );
 
 // РЕЗУЛЬТАТЫ (Admin)
+// Получение всех выполненных заданий для админа
 app.get("/get-result-admin", UserTasksController.getAllResult);
+
+// Получение задания для оценивания админом по user_id и taskNumber
+app.get(
+  "/get-result-data-admin/:userId/:taskNumber",
+  UserTasksController.getResult
+);
 
 // Оценка пользователя исходя из задания и его id
 // app.get("/tasks", async (req, res) => {
