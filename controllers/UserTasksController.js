@@ -1,5 +1,7 @@
 import UserTasks from "../models/UserTasks.js";
 import Tasks from "../models/Tasks.js";
+import User from "../models/User.js";
+import moment from "moment-timezone";
 
 export const create = async (req, res) => {
   try {
@@ -94,6 +96,8 @@ export const send = async (req, res) => {
     console.log(task.done);
     task.done = 1;
     console.log(task.done);
+    task.doneAt =
+      moment().tz("Europe/Moscow").format("YYYY-MM-DDTHH:mm:ss") + "Z";
 
     await task.save();
 
@@ -230,6 +234,35 @@ export const getAllDone = async (req, res) => {
     console.error(error);
     res.status(500).json({
       message: "Не удалось получить список задач.",
+    });
+  }
+};
+
+export const getResult = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const taskNumber = req.params.taskNumber;
+
+    const taskId = await Tasks.findOne({ taskNumber: taskNumber }).exec();
+
+    const task = await UserTasks.findOne({
+      user_id: userId,
+      task_id: taskId,
+    }).exec();
+
+    const user = await User.findById(userId).exec();
+
+    res.json({
+      codeText: task.codeText,
+      commentAdmin: task.commentAdmin,
+      commentUser: task.commentUser,
+      fullName: user.fullName,
+      doneAt: task.doneAt,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось получить результат.",
     });
   }
 };

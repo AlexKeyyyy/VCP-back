@@ -40,6 +40,10 @@ const TasksSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    doneAt: {
+      type: Date,
+      required: false,
+    },
   },
   {
     timestamps: true,

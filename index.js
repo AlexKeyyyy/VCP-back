@@ -253,6 +253,9 @@ app.get("/user-taskk/:id/:taskNumber", UserTasksController.getCode);
 // Получение всех заданий из UserTasks по user_id (выполненные)
 app.get("/get-done-tasks/:userId", UserTasksController.getAllDone);
 
+// Получение выполненного задания из UserTasks по user_id  и taskNumber
+app.get("/get-result-data/:userId/:taskNumber", UserTasksController.getResult);
+
 // Оценка пользователя исходя из задания и его id
 // app.get("/tasks", async (req, res) => {
 //   try {
