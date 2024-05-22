@@ -260,6 +260,7 @@ export const getResult = async (req, res) => {
       commentUser: task.commentUser,
       fullName: user.fullName,
       doneAt: task.doneAt,
+      mark: task.mark,
     });
   } catch (error) {
     console.error(error);
@@ -291,9 +292,9 @@ export const comment = async (req, res) => {
       timestamp:
         moment().tz("Europe/Moscow").format("YYYY-MM-DDTHH:mm:ss") + "Z",
     };
-    console.log(admin);
+    console.log(admin.email === user.email);
     if (admin.email === user.email) {
-      task.commentAdmin.push(comment);
+      task.commentAdmin = comment;
     } else {
       task.commentUser.push(comment);
     }
