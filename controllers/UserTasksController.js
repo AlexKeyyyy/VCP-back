@@ -270,34 +270,51 @@ export const getResult = async (req, res) => {
   }
 };
 
-export const comment = async (req, res) => {
+export const commentUser = async (req, res) => {
   try {
     const userId = req.params.userId;
     const taskNumber = req.params.taskNumber;
     const { message } = req.body;
 
     const user = await User.findById(userId).exec();
+    if (!user) {
+      return res.status(404).json({
+        message: "Пользователь не найден.",
+      });
+    }
 
-    const admin = await Admin.findOne({ email: user.email }).exec();
+    //const admin = await Admin.findOne({ email: user.email }).exec();
 
     const taskId = await Tasks.findOne({ taskNumber: taskNumber }).exec();
+    if (!taskId) {
+      return res.status(404).json({
+        message: "Задача не найдена.",
+      });
+    }
 
     const task = await UserTasks.findOne({
       user_id: userId,
       task_id: taskId,
     }).exec();
+    if (!task) {
+      return res.status(404).json({
+        message: "Задача пользователя не найдена.",
+      });
+    }
 
     const comment = {
       message,
       timestamp:
         moment().tz("Europe/Moscow").format("YYYY-MM-DDTHH:mm:ss") + "Z",
     };
-    console.log(admin.email === user.email);
-    if (admin.email === user.email) {
-      task.commentAdmin = comment;
-    } else {
-      task.commentUser.push(comment);
-    }
+    //console.log(admin.email === user.email);
+    // if (admin) {
+    //   task.commentAdmin.push(comment);
+    // } else {
+    //   task.commentUser.push(comment);
+    // }
+
+    task.commentUser.push(comment);
 
     await task.save();
 
