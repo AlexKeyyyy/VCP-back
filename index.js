@@ -180,30 +180,6 @@ app.post("/user-tasks", checkAuth, async (req, res) => {
     res.status(500).json({ message: "Ошибка при назначении задания." });
   }
 });
-// app.post("/user-tasks", checkAuth,
-// async (req, res) => {
-//   try {
-//     const { mark, outputData, codeText, user_id, task_id } = req.body;
-
-//     // Создание новой записи в таблице UserTasks
-//     const newUserTask = new UserTasks({
-//       mark,
-//       outputData,
-//       codeText,
-//       user_id,
-//       task_id,
-//     });
-
-//     // Сохранение записи в базе данных
-//     await newUserTask.save();
-
-//     res.status(201).json({ message: "Запись успешно создана" });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Ошибка при создании записи" });
-//   }
-// }
-// );
 
 // Получение всех заданий из Tasks
 app.get("/tasksAll", async (req, res) => {
@@ -288,48 +264,6 @@ app.patch(
 // Отправка отчета
 app.get("/make-report", UserTasksController.makeReport);
 
-// Оценка пользователя исходя из задания и его id
-// app.get("/tasks", async (req, res) => {
-//   try {
-//     const taskId = req.query.id;
-//     const userId = req.query.userId;
-//     //const id = req.params.id.split("=")[1];
-//     const task = await Tasks.findById(taskId).exec();
-//     const userTask = await UserTasks.findOne({
-//       task_id: taskId,
-//       user_id: userId,
-//     }).exec();
-//     console.log(task);
-//     console.log(userTask);
-//     const answer = task.outputData;
-//     const userAnswer = userTask.outputData;
-//     let correctCount = 0;
-//     let ans, userAns;
-
-//     for (let i = 0; i < answer.length; i++) {
-//       ans = answer[i];
-//       userAns = userAnswer[i];
-
-//       if (ans.toString() === userAns.toString()) {
-//         correctCount++;
-//       }
-//     }
-//     const percentage = Math.round((correctCount / answer.length) * 100);
-
-//     res.json({ message: `Вы ответили правильно на ${percentage}% вопросов` });
-
-//     await UserTasks.updateOne(
-//       { task_id: taskId, user_id: userId },
-//       { $set: { mark: percentage } }
-//     );
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       message: "Не удалось проверить.",
-//     });
-//   }
-// });
-
 // Создание нового userTask
 app.post(
   "/user-tasks2",
@@ -342,7 +276,7 @@ app.post(
 // Получение заданий из UserTasks по которым есть mark
 app.get("/user-tasks-with-mark/:id", UserTasksController.getAllWithMark);
 
-app.listen(process.env.PORT, (err) => {
+app.listen(process.env.PORT || 4445, (err) => {
   if (err) {
     return console.log(err);
   }
