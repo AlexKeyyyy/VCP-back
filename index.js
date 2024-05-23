@@ -151,29 +151,33 @@ app.post("/user-id-by-fullname", async (req, res) => {
   }
 });
 
-// Это что такое....
+// Назначение пользователю задания в UserTasks
 app.post("/user-tasks", checkAuth, async (req, res) => {
   try {
     const { mark, outputData, codeText, user_id, task_id } = req.body;
 
     console.log("Полученные данные:", req.body);
 
-    // Создание новой записи в таблице UserTasks
-    const newUserTask = new UserTasks({
-      mark,
-      outputData,
-      codeText,
-      user_id,
-      task_id,
-    });
+    const isExist = await UserTasks.findOne({ user_id, task_id });
+    if (!isExist) {
+      // Создание новой записи в таблице UserTasks
+      const newUserTask = new UserTasks({
+        mark,
+        outputData,
+        codeText,
+        user_id,
+        task_id,
+      });
 
-    // Сохранение записи в базе данных
-    await newUserTask.save();
-
-    res.status(201).json({ message: "Запись успешно создана" });
+      // Сохранение записи в базе данных
+      await newUserTask.save();
+      res.status(201).json({ message: "Пользователю назначено задание." });
+    } else {
+      res.json({ message: "Пользователю уже назначено данное задание." });
+    }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Ошибка при создании записи" });
+    res.status(500).json({ message: "Ошибка при назначении задания." });
   }
 });
 // app.post("/user-tasks", checkAuth,
