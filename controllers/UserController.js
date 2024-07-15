@@ -13,6 +13,7 @@ export const register = async (req, res) => {
       fullName: req.body.fullName,
       email: req.body.email,
       passwordHash: hash,
+      avatarUrl: req.body.avatarUrl
     });
 
     const admin = await Admin.findOne({ email: req.body.email });
@@ -167,7 +168,7 @@ export const editProfile = async (req, res) => {
 export const getUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    const user = await User.findById(userId).select("fullName email");
+    const user = await User.findById(userId).select("fullName email avatarUrl");
     if (!user) {
       return res.status(404).json({ message: "Пользователь не найден" });
     }
