@@ -5,7 +5,13 @@ export const registerValidator = [
   body("password", "Пароль слишком короткий (минимум 5 символов)").isLength({
     min: 5,
   }),
-  body("fullName", "Имя слишком короткое (минимум 3 символа)").isLength({
+  body("name", "Имя слишком короткое (минимум 3 символа)").isLength({
+    min: 3,
+  }),
+  body("surname", "Фамилия слишком короткая (минимум 3 символа)").isLength({
+    min: 3,
+  }),
+  body("patro", "Отчетсво слишком короткое (минимум 3 символа)").isLength({
     min: 3,
   }),
   body("avatarUrl", "Это не ссылка").optional().isURL(),

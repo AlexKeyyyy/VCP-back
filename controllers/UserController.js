@@ -10,10 +10,12 @@ export const register = async (req, res) => {
     const hash = await bcrypt.hash(password, salt);
 
     const doc = new User({
-      fullName: req.body.fullName,
+      name: req.body.name,
+      surname: req.body.surname,
+      patro: req.body.patro,
       email: req.body.email,
       passwordHash: hash,
-      avatarUrl: req.body.avatarUrl
+      avatarUrl: req.body.avatarUrl,
     });
 
     const admin = await Admin.findOne({ email: req.body.email });
