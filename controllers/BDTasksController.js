@@ -12,3 +12,29 @@ export const getAllTasks = async (req, res) => {
     });
   }
 };
+
+export const editTask = async (req, res) => {
+  try {
+    const { taskNumber } = req.params;
+    const { taskText } = req.body;
+
+    const updatedTask = await Tasks.findOneAndUpdate(
+      { taskNumber: taskNumber },
+      { $set: { taskText } },
+      { new: true }
+    );
+
+    if (!updatedTask) {
+      return res.status(404).json({
+        message: "Задание не найдено.",
+      });
+    }
+
+    return res.status(200).json(updatedTask);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось отредактировать задание в БД.",
+    });
+  }
+};

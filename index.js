@@ -127,6 +127,8 @@ app.post(
 //BDTasks
 app.get("/admin-get-bd-tasks", BDTasksController.getAllTasks);
 
+app.patch("/admin-patch-task-edit/:taskNumber", BDTasksController.editTask);
+
 // // Редактирование профиля пользователя
 // app.put("/user/:id", UserController.editProfile);
 
