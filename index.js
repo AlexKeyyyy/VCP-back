@@ -13,6 +13,7 @@ import * as UserController from "./controllers/UserController.js";
 import * as UserTasksController from "./controllers/UserTasksController.js";
 import * as TasksController from "./controllers/TasksController.js";
 import * as UserTaskController from "./controllers/UserTaskController.js";
+import * as BDCandidatesController from "./controllers/BDCandidatesController.js";
 import multer from "multer";
 import cors from "cors";
 import Tasks from "./models/Tasks.js";
@@ -108,6 +109,9 @@ app.post(
   "/user-post-new-comment/:user_id/:taskNumber",
   UserTaskController.sendComment
 );
+
+//ADMIN
+app.get("/admin-get-candidates", BDCandidatesController.getCandidates);
 
 // // Редактирование профиля пользователя
 // app.put("/user/:id", UserController.editProfile);
