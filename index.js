@@ -97,6 +97,18 @@ app.get(
   UserTaskController.getTaskInfo
 );
 
+//Нажатие кнопки Отправить решение
+app.patch(
+  "/user-patch-task-load/:user_id/:taskNumber",
+  UserTaskController.sendCode
+);
+
+//Нажатие кнопки отправки комментария
+app.post(
+  "/user-post-new-comment/:user_id/:taskNumber",
+  UserTaskController.sendComment
+);
+
 // // Редактирование профиля пользователя
 // app.put("/user/:id", UserController.editProfile);
 
