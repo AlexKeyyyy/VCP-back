@@ -15,6 +15,7 @@ import * as TasksController from "./controllers/TasksController.js";
 import * as UserTaskController from "./controllers/UserTaskController.js";
 import * as BDCandidatesController from "./controllers/BDCandidatesController.js";
 import * as BDTasksController from "./controllers/BDTasksController.js";
+import * as AdminHomeController from "./controllers/AdminHomeController.js";
 import multer from "multer";
 import cors from "cors";
 import Tasks from "./models/Tasks.js";
@@ -112,6 +113,9 @@ app.post(
 );
 
 //ADMIN
+//AdminHome
+app.get("/admin-get-main-stats", AdminHomeController.getMainStats);
+
 //BDCandidates
 app.get("/admin-get-candidates", BDCandidatesController.getCandidates);
 
