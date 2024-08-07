@@ -38,3 +38,20 @@ export const editTask = async (req, res) => {
     });
   }
 };
+
+export const deleteTask = async (req, res) => {
+  try {
+    const { taskNumber } = req.params;
+
+    const deletedTask = await Tasks.findOneAndDelete({
+      taskNumber: taskNumber,
+    });
+
+    return res.status(200).json(deletedTask);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось удалить задание.",
+    });
+  }
+};

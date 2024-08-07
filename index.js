@@ -125,9 +125,16 @@ app.post(
 );
 
 //BDTasks
+//Получение всех задач в БД Tasks
 app.get("/admin-get-bd-tasks", BDTasksController.getAllTasks);
 
+//Редактирование задач в БД Tasks
 app.patch("/admin-patch-task-edit/:taskNumber", BDTasksController.editTask);
+
+//Удаление задачи из БД Tasks
+app.delete("/admin-delete-task/:taskNumber", BDTasksController.deleteTask);
+
+//Добавление задачи в БД Tasks
 
 // // Редактирование профиля пользователя
 // app.put("/user/:id", UserController.editProfile);
