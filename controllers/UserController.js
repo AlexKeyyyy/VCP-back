@@ -180,3 +180,82 @@ export const getUser = async (req, res) => {
     res.status(500).json({ message: "Ошибка сервера" });
   }
 };
+
+export const writeEmail = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const user = await User.findById(user_id).select("name surname patro");
+    if (!user) {
+      return res.status(404).json({ message: "Пользователь не найден" });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Ошибка сервера" });
+  }
+};
+
+export const getProfile = async (req, res) => {
+  try {
+  } catch (error) {}
+};
+
+export const updateAvatar = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Файл не загружен" });
+    }
+
+    const avatarUrl = `/uploads/${req.file.filename}`;
+    const updatedUser = await User.findByIdAndUpdate(
+      user_id,
+      { avatarUrl },
+      { new: true } // Возвращает обновленный документ
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "Пользователь не найден" });
+    }
+
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: "Ошибка сервера", error });
+  }
+};
+
+export const updateProfileData = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    console.log("User ID:", user_id); // Добавляем лог для проверки userId
+
+    let updateData = req.body;
+    console.log("Update Data:", updateData); // Добавляем лог для проверки updateData
+
+    if (updateData.password) {
+      // Хеширование нового пароля
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(updateData.password, salt);
+
+      // Заменяем пароль в объекте updateData на его хеш
+      updateData = { ...updateData, passwordHash };
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(user_id, updateData, {
+      new: true,
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "Пользователь не найден" });
+    }
+
+    // Отправляем обновленные данные пользователя в ответе
+    res.json(updatedUser);
+  } catch (err) {
+    console.log(err);
+    res
+      .status(500)
+      .json({ message: "Не удалось обновить данные пользователя" });
+  }
+};

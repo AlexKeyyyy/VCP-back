@@ -28,24 +28,24 @@ mongoose
 const app = express();
 
 const storage = multer.diskStorage({
-  destination: (_,__, cb) => {
-    cb(null, 'uploads')
+  destination: (_, __, cb) => {
+    cb(null, "uploads");
   },
   filename: (_, file, cb) => {
-    cb(null, file.originalname)
+    cb(null, file.originalname);
   },
 });
 
-const upload = multer({storage});
+const upload = multer({ storage });
 
 app.use(express.json());
 app.use(cors());
 app.use("/uploads", express.static("uploads"));
 
-app.post('/upload', upload.single('image'), (req, res) => {
+app.post("/upload", upload.single("image"), (req, res) => {
   res.json({
-    url: `/uploads/${req.file.originalname}`
-  })
+    url: `/uploads/${req.file.originalname}`,
+  });
 });
 
 // USER
@@ -64,6 +64,25 @@ app.post(
   registerValidator,
   handleValidationErrors,
   UserController.register
+);
+
+// Для составления письма в поддержку
+app.get("/user-get-fullname/:user_id", UserController.writeEmail);
+
+//Переход на страницу пользователя
+app.get("/user-get-profile/:user_id", UserController.getProfile);
+
+//Обновление фотографии пользователя
+app.patch(
+  "/user-patch-profile-avatar/:user_id",
+  upload.single("avatar"),
+  UserController.updateAvatar
+);
+
+//Обновление данных пользователя
+app.patch(
+  "/user-patch-profile-data/:user_id",
+  UserController.updateProfileData
 );
 
 // Редактирование профиля пользователя
