@@ -16,6 +16,7 @@ import * as UserTaskController from "./controllers/UserTaskController.js";
 import * as BDCandidatesController from "./controllers/BDCandidatesController.js";
 import * as BDTasksController from "./controllers/BDTasksController.js";
 import * as AdminHomeController from "./controllers/AdminHomeController.js";
+import * as BDResultsController from "./controllers/BDResultsController.js";
 import multer from "multer";
 import cors from "cors";
 import Tasks from "./models/Tasks.js";
@@ -134,9 +135,11 @@ app.patch("/admin-patch-task-edit/:taskNumber", BDTasksController.editTask);
 //Удаление задачи из БД Tasks
 app.delete("/admin-delete-task/:taskNumber", BDTasksController.deleteTask);
 
+//Добавление задачи в БД Tasks
 app.post("/admin-post-task-add/:taskNumber", BDTasksController.addTask);
 
-//Добавление задачи в БД Tasks
+//BDResults
+app.get("/admin-get-solutions", BDResultsController.getSolutions);
 
 // // Редактирование профиля пользователя
 // app.put("/user/:id", UserController.editProfile);
