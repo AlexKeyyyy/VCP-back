@@ -55,3 +55,24 @@ export const deleteTask = async (req, res) => {
     });
   }
 };
+
+export const addTask = async (req, res) => {
+  try {
+    const { taskNumber } = req.params;
+    const { taskText } = req.body;
+
+    const doc = new Tasks({
+      taskNumber: taskNumber,
+      taskText: taskText,
+    });
+
+    const task = await doc.save();
+    res.json(task);
+    return res.status(200).json(task);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось добавить задание.",
+    });
+  }
+};

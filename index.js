@@ -134,6 +134,8 @@ app.patch("/admin-patch-task-edit/:taskNumber", BDTasksController.editTask);
 //Удаление задачи из БД Tasks
 app.delete("/admin-delete-task/:taskNumber", BDTasksController.deleteTask);
 
+app.post("/admin-post-task-add/:taskNumber", BDTasksController.addTask);
+
 //Добавление задачи в БД Tasks
 
 // // Редактирование профиля пользователя
