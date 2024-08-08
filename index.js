@@ -120,10 +120,7 @@ app.get("/admin-get-main-stats", AdminHomeController.getMainStats);
 //BDCandidates
 app.get("/admin-get-candidates", BDCandidatesController.getCandidates);
 
-app.post(
-  "/admin-post-candidates-assign/:user_id",
-  BDCandidatesController.assignTasks
-);
+app.post("/admin-post-candidates-assign/", BDCandidatesController.assignTasks);
 
 //BDTasks
 //Получение всех задач в БД Tasks

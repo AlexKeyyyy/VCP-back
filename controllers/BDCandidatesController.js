@@ -46,7 +46,7 @@ export const getCandidates = async (req, res) => {
 
 export const assignTasks = async (req, res) => {
   try {
-    const { user_id } = req.params;
+    const { name, surname, patro } = req.body;
 
     const { choosedTaskNumbers } = req.body;
 
@@ -57,8 +57,18 @@ export const assignTasks = async (req, res) => {
         throw new Error(`Задание с номером ${element} не найдено.`);
       }
 
+      const user = await User.findOne({
+        name: name,
+        surname: surname,
+        patro: patro,
+      });
+
+      if (!user) {
+        throw new Error(`Пользователь ${name} ${surname} ${patro} не найден.`);
+      }
+
       const userTask = new UserTasks({
-        user_id: user_id,
+        user_id: user._id,
         task_id: task._id,
       });
 
