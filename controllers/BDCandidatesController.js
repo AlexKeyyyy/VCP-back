@@ -19,12 +19,18 @@ export const getCandidates = async (req, res) => {
         const averageMark =
           completedTasks > 0 ? (totalMarks / completedTasks).toFixed(2) : "N/A";
 
+        let avatarPath = "N/A";
+        if (user.avatarUrl) {
+          avatarPath = `http://localhost:4445${user.avatarUrl}`;
+        }
+
         return {
           name: user.name,
           surname: user.surname,
           patro: user.patro,
           taskCount: tasks.length,
           averageMark: averageMark,
+          avatarUrl: avatarPath,
         };
       })
     );
