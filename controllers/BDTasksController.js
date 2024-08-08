@@ -67,7 +67,6 @@ export const addTask = async (req, res) => {
     });
 
     const task = await doc.save();
-    res.json(task);
     return res.status(200).json(task);
   } catch (error) {
     console.error(error);
