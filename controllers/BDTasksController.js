@@ -1,3 +1,5 @@
+import User from "../models/User.js";
+import UserTasks from "../models/UserTasks.js";
 import Tasks from "../models/Tasks.js";
 
 export const getAllTasks = async (req, res) => {
@@ -73,5 +75,28 @@ export const addTask = async (req, res) => {
     res.status(500).json({
       message: "Не удалось добавить задание.",
     });
+  }
+};
+
+export const getNotAssignedTasks = async (req, res) => {
+  try {
+    const { name, surname, patro } = req.query;
+
+    const user = await User.findOne({ name, surname, patro });
+    if (!user) {
+      return res.status(404).json({ message: "Пользователь не найден." });
+    }
+
+    const userTasks = await UserTasks.find({ user_id: user._id }).select('task_id');
+    const assignedTaskIds = userTasks.map(userTask => userTask.task_id);
+
+    const notAssignedTasks = await Tasks.find({
+      _id: { $nin: assignedTaskIds }
+    });
+
+    return res.status(200).json(notAssignedTasks);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Не удалось получить список незачисленных задач." });
   }
 };

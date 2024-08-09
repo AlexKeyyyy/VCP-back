@@ -121,6 +121,7 @@ app.get("/admin-get-main-stats", AdminHomeController.getMainStats);
 app.get("/admin-get-candidates", BDCandidatesController.getCandidates);
 
 app.post("/admin-post-candidates-assign/", BDCandidatesController.assignTasks);
+app.get("/admin-get-not-assigned-tasks", BDTasksController.getNotAssignedTasks);
 
 //BDTasks
 //Получение всех задач в БД Tasks

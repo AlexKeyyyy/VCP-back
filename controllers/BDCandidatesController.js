@@ -4,21 +4,27 @@ import UserTasks from "../models/UserTasks.js";
 
 export const getCandidates = async (req, res) => {
   try {
-    const users = await User.find();
+    // Получаем только пользователей (role: "user")
+    const users = await User.find({ role: 'user' });
 
+    // Обрабатываем пользователей, чтобы получить нужные данные
     const candidates = await Promise.all(
       users.map(async (user) => {
+        // Получаем задачи для пользователя
         const tasks = await UserTasks.find({ user_id: user._id });
 
+        // Вычисляем общие оценки и количество выполненных задач
         const totalMarks = tasks.reduce(
           (acc, task) => acc + (task.mark >= 0 ? task.mark : 0),
           0
         );
         const completedTasks = tasks.filter((task) => task.mark >= 0).length;
 
+        // Вычисляем среднюю оценку
         const averageMark =
           completedTasks > 0 ? (totalMarks / completedTasks).toFixed(2) : "N/A";
 
+        // Формируем путь к аватарке
         let avatarPath = "N/A";
         if (user.avatarUrl) {
           avatarPath = `http://localhost:4445${user.avatarUrl}`;
@@ -34,6 +40,7 @@ export const getCandidates = async (req, res) => {
         };
       })
     );
+
     // Возвращаем список кандидатов
     return res.status(200).json(candidates);
   } catch (error) {
@@ -43,6 +50,7 @@ export const getCandidates = async (req, res) => {
     });
   }
 };
+
 
 export const assignTasks = async (req, res) => {
   try {

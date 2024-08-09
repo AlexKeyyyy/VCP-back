@@ -1,5 +1,6 @@
 import UserTasks from "../models/UserTasks.js"; // путь к модели UserTasks
 import User from "../models/User.js"; // путь к модели User
+import Tasks from "../models/Tasks.js"; // путь к модели User
 
 export const getSolutions = async (req, res) => {
   try {
@@ -12,12 +13,22 @@ export const getSolutions = async (req, res) => {
         // Получаем все задания для конкретного пользователя
         const tasks = await UserTasks.find({ user_id: user._id });
 
-        // Формируем массив задач с нужной информацией
-        const tasksInfo = tasks.map((task, index) => ({
-          taskNumber: task.taskNumber, // номер задания по порядку
-          firstUpdate: task.createdAt, // время создания задания
-          mark: task.mark, // оценка задания
+        // Если есть задания, получаем их детали
+        const tasksInfo = await Promise.all(tasks.map(async (task) => {
+          // Находим задание в коллекции Tasks
+          const taskDetails = await Tasks.findById(task.task_id);
+          return {
+            taskNumber: taskDetails ? taskDetails.taskNumber : "Удалено", // Используем "Unknown", если данные не найдены
+            firstUpdate: task.createdAt, // время создания задания
+            mark: task.mark, // оценка задания
+          };
         }));
+
+        // Формируем путь к аватару
+        let avatarPath = "N/A";
+        if (user.avatarUrl) {
+          avatarPath = `http://localhost:4445${user.avatarUrl}`;
+        }
 
         // Возвращаем данные пользователя и его задач
         return {
@@ -25,6 +36,7 @@ export const getSolutions = async (req, res) => {
           surname: user.surname,
           patro: user.patro,
           tasks: tasksInfo, // список задач пользователя
+          avatarUrl: avatarPath,
         };
       })
     );
