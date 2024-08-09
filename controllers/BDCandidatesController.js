@@ -46,15 +46,17 @@ export const getCandidates = async (req, res) => {
 
 export const assignTasks = async (req, res) => {
   try {
-    const { name, surname, patro } = req.body;
+    const { name, surname, patro, choosedTaskNumbers } = req.body;
 
-    const { choosedTaskNumbers } = req.body;
+    if (!name || !surname || !patro || !choosedTaskNumbers) {
+      return res.status(400).json({ message: "Некоторые обязательные поля отсутствуют." });
+    }
 
     const promises = choosedTaskNumbers.map(async (element) => {
-      const task = await Tasks.findOne({ taskNumber: element });
+      const task = await Tasks.findOne({ _id: element });
 
       if (!task) {
-        throw new Error(`Задание с номером ${element} не найдено.`);
+        throw new Error(`Задание с id ${element} не найдено.`);
       }
 
       const user = await User.findOne({
@@ -79,9 +81,11 @@ export const assignTasks = async (req, res) => {
 
     return res.status(200).json(newTasks);
   } catch (error) {
-    console.error(error);
+    console.error("Ошибка при назначении заданий:", error);
     res.status(500).json({
       message: "Не удалось назначить задание кандидату.",
+      error: error.message
     });
   }
 };
+
