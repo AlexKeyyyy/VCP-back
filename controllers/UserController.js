@@ -184,13 +184,13 @@ export const getUser = async (req, res) => {
 export const writeEmail = async (req, res) => {
   try {
     const { user_id } = req.params;
-    const user = await User.findById(user_id).select("name surname patro");
+    const user = await User.findById(user_id).select("name surname patro email");
     if (!user) {
       return res.status(404).json({ message: "Пользователь не найден" });
     }
     res.json(user);
   } catch (error) {
-    console.error(error);
+    console.error("Ошибка при получении данных пользователя:", error);
     res.status(500).json({ message: "Ошибка сервера" });
   }
 };
