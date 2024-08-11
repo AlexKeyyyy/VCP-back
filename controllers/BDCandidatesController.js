@@ -80,6 +80,7 @@ export const assignTasks = async (req, res) => {
       const userTask = new UserTasks({
         user_id: user._id,
         task_id: task._id,
+        status: "assigned",
       });
 
       return userTask.save();
