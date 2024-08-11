@@ -14,15 +14,18 @@ export const getSolutions = async (req, res) => {
         const tasks = await UserTasks.find({ user_id: user._id });
 
         // Если есть задания, получаем их детали
-        const tasksInfo = await Promise.all(tasks.map(async (task) => {
-          // Находим задание в коллекции Tasks
-          const taskDetails = await Tasks.findById(task.task_id);
-          return {
-            taskNumber: taskDetails ? taskDetails.taskNumber : "Удалено", // Используем "Unknown", если данные не найдены
-            firstUpdate: task.createdAt, // время создания задания
-            mark: task.mark, // оценка задания
-          };
-        }));
+        const tasksInfo = await Promise.all(
+          tasks.map(async (task) => {
+            // Находим задание в коллекции Tasks
+            const taskDetails = await Tasks.findById(task.task_id);
+            return {
+              taskNumber: taskDetails ? taskDetails.taskNumber : "Удалено", // Используем "Unknown", если данные не найдены
+              firstUpdate: task.createdAt, // время создания задания
+              mark: task.mark, // оценка задания
+              status: task.status,
+            };
+          })
+        );
 
         // Формируем путь к аватару
         let avatarPath = "N/A";

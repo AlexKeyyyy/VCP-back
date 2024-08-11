@@ -54,6 +54,13 @@ const TasksSchema = new mongoose.Schema(
       type: Date,
       required: false,
     },
+    status: {
+      type: String,
+      default: "assigned",
+    },
+    checkedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
