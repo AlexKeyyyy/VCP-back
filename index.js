@@ -139,6 +139,9 @@ app.post("/admin-post-task-add/:taskNumber", BDTasksController.addTask);
 //BDResults
 app.get("/admin-get-solutions", BDResultsController.getSolutions);
 
+//Оценивание кандидата админом
+app.patch("/admin-patch-mark-edit/:taskNumber", BDResultsController.markUser);
+
 // // Редактирование профиля пользователя
 // app.put("/user/:id", UserController.editProfile);
 
