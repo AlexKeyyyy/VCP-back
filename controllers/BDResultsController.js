@@ -146,7 +146,7 @@ export const commentAdmin = async (req, res) => {
 export const getSolutionDetails = async (req, res) => {
   try {
     const { taskNumber } = req.params;
-    const { name, surname, patro } = req.body;
+    const { name, surname, patro } = req.query;
 
     // Find the user by name, surname, and patro
     const user = await User.findOne({
