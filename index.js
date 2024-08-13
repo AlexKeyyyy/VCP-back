@@ -147,6 +147,11 @@ app.post(
   BDResultsController.commentAdmin
 );
 
+app.get(
+  "/admin-get-solution/:taskNumber",
+  BDResultsController.getSolutionDetails
+);
+
 // // Редактирование профиля пользователя
 // app.put("/user/:id", UserController.editProfile);
 

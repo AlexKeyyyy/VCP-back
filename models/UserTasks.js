@@ -65,6 +65,10 @@ const TasksSchema = new mongoose.Schema(
       type: String,
       default: "pending",
     },
+
+    results: {
+      type: Object,
+    },
   },
   {
     timestamps: true,
