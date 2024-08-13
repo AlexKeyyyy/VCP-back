@@ -92,3 +92,52 @@ export const markUser = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const commentAdmin = async (req, res) => {
+  try {
+    const { taskNumber } = req.params;
+    const { commentText, name, surname, patro } = req.body;
+
+    const task = await Tasks.findOne({ taskNumber: taskNumber });
+
+    // Получаем список всех пользователей
+    const user = await User.findOne({
+      name: name,
+      surname: surname,
+      patro: patro,
+    });
+
+    // Проверяем, существует ли пользователь и задача
+    if (!user || !task) {
+      return res.status(404).json({ message: "User or Task not found" });
+    }
+
+    const commentedTask = await UserTasks.findOne({
+      user_id: user._id,
+      task_id: task._id,
+    }).exec();
+    if (!task) {
+      return res.status(404).json({
+        message: "Задача пользователя не найдена.",
+      });
+    }
+
+    const comment = {
+      message: commentText,
+      timestamp: new Date(),
+    };
+
+    commentedTask.commentAdmin.push(comment);
+
+    await commentedTask.save();
+
+    res.status(200).json({
+      message: "Комментарий успешно добавлен",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось отправить сообщение.",
+    });
+  }
+};

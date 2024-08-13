@@ -61,6 +61,10 @@ const TasksSchema = new mongoose.Schema(
     checkedAt: {
       type: Date,
     },
+    sonarStatus: {
+      type: String,
+      default: "pending",
+    },
   },
   {
     timestamps: true,

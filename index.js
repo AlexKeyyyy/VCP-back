@@ -142,6 +142,11 @@ app.get("/admin-get-solutions", BDResultsController.getSolutions);
 //Оценивание кандидата админом
 app.patch("/admin-patch-mark-edit/:taskNumber", BDResultsController.markUser);
 
+app.post(
+  "/admin-post-new-comment/:taskNumber",
+  BDResultsController.commentAdmin
+);
+
 // // Редактирование профиля пользователя
 // app.put("/user/:id", UserController.editProfile);
 
