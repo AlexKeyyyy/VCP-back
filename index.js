@@ -152,6 +152,11 @@ app.get(
   BDResultsController.getSolutionDetails
 );
 
+app.post(
+  "/admin-post-download-report/:taskNumber",
+  BDResultsController.makeTaskReport
+);
+
 // // Редактирование профиля пользователя
 // app.put("/user/:id", UserController.editProfile);
 
