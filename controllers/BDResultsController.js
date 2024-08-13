@@ -182,7 +182,7 @@ export const getSolutionDetails = async (req, res) => {
     }
 
     // Extract the required data from userTask
-    const { createdAt, updatedAt, codeText, commentAdmin, commentUser } =
+    const { createdAt, updatedAt, codeText, commentAdmin, commentUser, mark } =
       userTask;
 
     // Accessing nested fields in the `results` object inside `userTask`
@@ -209,6 +209,7 @@ export const getSolutionDetails = async (req, res) => {
       specificIssue, // Just for demonstration, remove if not needed
       commentAdmin,
       commentUser,
+      mark,
     };
 
     return res.status(200).json(responseData);
