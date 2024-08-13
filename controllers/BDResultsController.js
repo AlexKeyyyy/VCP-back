@@ -78,7 +78,7 @@ export const markUser = async (req, res) => {
 
     const updatedTask = await UserTasks.findOneAndUpdate(
       { user_id: user._id, task_id: task._id },
-      { $set: { mark, checkedAt: Date.now() } }, // Исправлено: Date.now() должно быть вызвано как функция.
+      { $set: { mark, checkedAt: Date.now(), status:"graded"} }, // Исправлено: Date.now() должно быть вызвано как функция.
       { new: true }
     );
 
