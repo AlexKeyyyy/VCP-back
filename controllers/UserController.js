@@ -209,7 +209,10 @@ export const getProfile = async (req, res) => {
 
     // Шаг 1: Найти все задания пользователя
     const userTasks = await UserTasks.find({ user_id: user_id });
-
+    let avatarPath = "N/A";
+    if (avatarUrl) {
+      avatarPath = `http://localhost:4445${avatarUrl}`;
+    }
     // Шаг 2: Посчитать среднюю оценку
     const totalMarks = userTasks.reduce((acc, task) => acc + task.mark, 0);
     const averageMark = totalMarks / userTasks.length;
@@ -226,14 +229,21 @@ export const getProfile = async (req, res) => {
     const tasks = await Promise.all(
       userTasks.map(async (task) => {
         const taskData = await Tasks.findById(task.task_id);
+
+        // Защита от ошибок, если taskData или task.results отсутствуют
+        const results = task.results || {};
+        const total = results.total !== undefined ? results.total : "-";
+        const effortTotal = results.effortTotal !== undefined ? results.effortTotal : "-";
+        const issuesCount = results.issues ? results.issues.length : "-";
+
         return {
           taskNumber: taskData?.taskNumber || "N/A", // Если taskData не найден, вернем 'N/A'
           mark: task.mark,
           status: task.status,
           updatedAt: task.updatedAt,
-          total: task.results.total,
-          effortTotal: task.results.effortTotal,
-          issuesCount: task.results.issues.length,
+          total,
+          effortTotal,
+          issuesCount,
         };
       })
     );
@@ -248,13 +258,14 @@ export const getProfile = async (req, res) => {
       surname,
       patro,
       email,
-      avatarUrl,
+      avatarUrl: avatarPath,
     });
   } catch (error) {
     console.error("Error in getProfile:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
+
 
 export const updateAvatar = async (req, res) => {
   try {
