@@ -17,6 +17,7 @@ import * as BDCandidatesController from "./controllers/BDCandidatesController.js
 import * as BDTasksController from "./controllers/BDTasksController.js";
 import * as AdminHomeController from "./controllers/AdminHomeController.js";
 import * as BDResultsController from "./controllers/BDResultsController.js";
+import * as UserResultController from "./controllers/UserResultController.js";
 import multer from "multer";
 import cors from "cors";
 import Tasks from "./models/Tasks.js";
@@ -111,6 +112,12 @@ app.patch(
 app.post(
   "/user-post-new-comment/:user_id/:taskNumber",
   UserTaskController.sendComment
+);
+
+//UserResult
+app.get(
+  "/user-get-result-info/:user_id/:taskNumber",
+  UserResultController.getResult
 );
 
 //ADMIN
