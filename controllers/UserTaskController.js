@@ -1,6 +1,7 @@
 import Tasks from "../models/Tasks.js";
 import User from "../models/User.js";
 import UserTasks from "../models/UserTasks.js";
+import { commentAdmin, commentUser } from "./UserTasksController.js";
 
 export const getTaskInfo = async (req, res) => {
   try {
@@ -16,6 +17,11 @@ export const getTaskInfo = async (req, res) => {
       return res.status(400).json({ message: "Задание не найдено" });
     }
 
+    const userTask = await UserTasks.findOne({
+      user_id: user_id,
+      task_id: task._id,
+    });
+
     const response = {
       name: user.name,
       surname: user.surname,
@@ -23,6 +29,8 @@ export const getTaskInfo = async (req, res) => {
       updatedAt: task.updatedAt,
       taskText: task.taskText,
       taskNumber: task.taskNumber,
+      commentAdmin: userTask.commentAdmin,
+      commentUser: userTask.commentUser,
     };
 
     return res.status(200).json(response);
@@ -120,6 +128,27 @@ export const sendComment = async (req, res) => {
     console.error(error);
     res.status(500).json({
       message: "Не удалось отправить сообщение.",
+    });
+  }
+};
+
+export const getDone = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const { taskNumber } = req.params;
+
+    const taskId = await Tasks.findOne({ taskNumber: taskNumber }).exec();
+
+    const task = await UserTasks.findOne({
+      user_id: userId,
+      task_id: taskId,
+    }).exec();
+
+    res.json(task.done);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Не удалось вернуть done.",
     });
   }
 };

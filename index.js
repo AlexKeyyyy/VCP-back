@@ -114,6 +114,8 @@ app.post(
   UserTaskController.sendComment
 );
 
+app.get("/user-task-getDone/:user_id/:taskNumber", UserTaskController.getDone);
+
 //UserResult
 app.get(
   "/user-get-result-info/:user_id/:taskNumber",
