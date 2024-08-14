@@ -120,6 +120,11 @@ app.get(
   UserResultController.getResult
 );
 
+app.post(
+  "/user-post-download-report/:user_id/:taskNumber",
+  UserResultController.makeUserReport
+);
+
 //ADMIN
 //AdminHome
 app.get("/admin-get-main-stats", AdminHomeController.getMainStats);
