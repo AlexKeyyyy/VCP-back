@@ -140,8 +140,8 @@ export const getDone = async (req, res) => {
     const taskId = await Tasks.findOne({ taskNumber: taskNumber }).exec();
 
     const task = await UserTasks.findOne({
-      user_id: userId,
-      task_id: taskId,
+      user_id: user_id, // заменил userId на user_id
+      task_id: taskId._id, // добавил ._id, так как taskId возвращает объект
     }).exec();
 
     res.json(task.done);

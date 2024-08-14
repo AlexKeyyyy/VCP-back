@@ -193,13 +193,12 @@ export const getSolutionDetails = async (req, res) => {
     } = userTask;
 
     // Accessing nested fields in the `results` object inside `userTask`
-    const total = userTask.results.total;
-    const effortTotal = userTask.results.effortTotal;
-    const issuesCount = userTask.results.issues.length; // Counting the number of issues
+    const total = userTask.results?.total !== undefined ? userTask.results.total : "-";
+    const effortTotal = userTask.results?.effortTotal !== undefined ? userTask.results.effortTotal : "-";
+    const issuesCount = userTask.results?.issues?.length ? userTask.results.issues.length : "-"; // Counting the number of issues
 
     // You can also access specific issues or other nested data if needed
-    const specificIssue =
-      userTask.results.issues[0]?.description || "No issues";
+    const specificIssue = userTask.results?.issues?.[0]?.description || "No issues";
 
     // Format the response data
     const responseData = {
