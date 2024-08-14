@@ -78,7 +78,7 @@ export const markUser = async (req, res) => {
 
     const updatedTask = await UserTasks.findOneAndUpdate(
       { user_id: user._id, task_id: task._id },
-      { $set: { mark, checkedAt: Date.now(), status:"graded"} }, // Исправлено: Date.now() должно быть вызвано как функция.
+      { $set: { mark, checkedAt: Date.now(), status: "graded" } }, // Исправлено: Date.now() должно быть вызвано как функция.
       { new: true }
     );
 
@@ -182,8 +182,15 @@ export const getSolutionDetails = async (req, res) => {
     }
 
     // Extract the required data from userTask
-    const { createdAt, updatedAt, codeText, commentAdmin, commentUser, mark } =
-      userTask;
+    const {
+      createdAt,
+      updatedAt,
+      codeText,
+      commentAdmin,
+      commentUser,
+      mark,
+      doneAt,
+    } = userTask;
 
     // Accessing nested fields in the `results` object inside `userTask`
     const total = userTask.results.total;
@@ -210,6 +217,7 @@ export const getSolutionDetails = async (req, res) => {
       commentAdmin,
       commentUser,
       mark,
+      doneAt,
     };
 
     return res.status(200).json(responseData);

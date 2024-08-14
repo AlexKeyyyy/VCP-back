@@ -53,6 +53,7 @@ export const sendCode = async (req, res) => {
     task.done = 1;
     console.log(task.done);
     task.doneAt = new Date();
+    task.status = "checking";
     //moment().tz("Europe/Moscow").format("YYYY-MM-DDTHH:mm:ss") + "Z";
 
     await task.save();
