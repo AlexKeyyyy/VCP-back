@@ -1,6 +1,8 @@
 import bcrypt from "bcrypt";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
+import UserTasks from "../models/UserTasks.js";
+import Tasks from "../models/Tasks.js";
 import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
@@ -184,7 +186,9 @@ export const getUser = async (req, res) => {
 export const writeEmail = async (req, res) => {
   try {
     const { user_id } = req.params;
-    const user = await User.findById(user_id).select("name surname patro email");
+    const user = await User.findById(user_id).select(
+      "name surname patro email"
+    );
     if (!user) {
       return res.status(404).json({ message: "Пользователь не найден" });
     }
@@ -197,7 +201,59 @@ export const writeEmail = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
-  } catch (error) {}
+    const { user_id } = req.params;
+
+    const user = await User.findById(user_id);
+
+    const { name, surname, patro, email, avatarUrl } = user;
+
+    // Шаг 1: Найти все задания пользователя
+    const userTasks = await UserTasks.find({ user_id: user_id });
+
+    // Шаг 2: Посчитать среднюю оценку
+    const totalMarks = userTasks.reduce((acc, task) => acc + task.mark, 0);
+    const averageMark = totalMarks / userTasks.length;
+
+    // Шаг 3: Посчитать общее количество заданий
+    const totalTasks = userTasks.length;
+
+    // Шаг 4: Посчитать количество заданий со статусом 'checking'
+    const checkingTasksCount = userTasks.filter(
+      (task) => task.status === "checking"
+    ).length;
+
+    // Шаг 5: Создать массив с задачами
+    const tasks = await Promise.all(
+      userTasks.map(async (task) => {
+        const taskData = await Tasks.findById(task.task_id);
+        return {
+          taskNumber: taskData?.taskNumber || "N/A", // Если taskData не найден, вернем 'N/A'
+          mark: task.mark,
+          status: task.status,
+          updatedAt: task.updatedAt,
+          total: task.results.total,
+          effortTotal: task.results.effortTotal,
+          issuesCount: task.results.issues.length,
+        };
+      })
+    );
+
+    // Возвращаем результат
+    return res.json({
+      averageMark,
+      totalTasks,
+      checkingTasksCount,
+      tasks,
+      name,
+      surname,
+      patro,
+      email,
+      avatarUrl,
+    });
+  } catch (error) {
+    console.error("Error in getProfile:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
 };
 
 export const updateAvatar = async (req, res) => {
