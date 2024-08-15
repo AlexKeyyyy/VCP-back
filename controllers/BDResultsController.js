@@ -146,7 +146,7 @@ export const commentAdmin = async (req, res) => {
 export const getSolutionDetails = async (req, res) => {
   try {
     const { taskNumber } = req.params;
-    const { name, surname, patro } = req.body;
+    const { name, surname, patro } = req.query;
 
     // Find the user by name, surname, and patro
     const user = await User.findOne({
@@ -211,7 +211,7 @@ export const getSolutionDetails = async (req, res) => {
     });
 
     const total = taskErrors + taskVulnaribilities + taskDefects;
-    const taskPropriety = (100 - (taskErrors / total) * 100).toFixed(2);
+    const taskPropriety = (100 - (taskErrors / total) * 100).toFixed(0);
 
     // Format the response data
     const responseData = {

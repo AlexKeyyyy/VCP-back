@@ -5,7 +5,7 @@ import PDFDocument from "pdfkit";
 
 export const getResult = async (req, res) => {
   try {
-    const { taskNumber, user_id } = req.params;
+    const { user_id, taskNumber } = req.params;
 
     // Find the user by name, surname, and patro
     const user = await User.findById(user_id);
@@ -70,7 +70,7 @@ export const getResult = async (req, res) => {
     });
 
     const total = taskErrors + taskVulnaribilities + taskDefects;
-    const taskPropriety = (100 - (taskErrors / total) * 100).toFixed(2);
+    const taskPropriety = (100 - (taskErrors / total) * 100).toFixed(0);
 
     // Format the response data
     const responseData = {
