@@ -191,7 +191,6 @@ export const getSolutionDetails = async (req, res) => {
       mark,
       doneAt,
     } = userTask;
-
     // Initialize error and defect counts
     let taskErrors = 0;
     let taskVulnaribilities = 0;
