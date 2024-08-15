@@ -216,7 +216,7 @@ export const getProfile = async (req, res) => {
     }
     // Шаг 2: Посчитать среднюю оценку
     const totalMarks = userTasksGraded.reduce((acc, task) => acc + task.mark, 0);
-    const averageMark = totalMarks / userTasksGraded.length;
+    const averageMarkTemp = totalMarks / userTasksGraded.length;
 
     // Шаг 3: Посчитать общее количество заданий
     const totalTasks = userTasks.length;
@@ -267,7 +267,8 @@ export const getProfile = async (req, res) => {
     //     }
     //   })
     // });
-
+    const averageMark = `${(isNaN(averageMarkTemp)) ? (0) : (averageMarkTemp.toFixed(2))}`;
+    console.log(averageMark);
     const total = taskErrors + taskVulnaribilities + taskDefects;
     const taskPropriety = (100 - (taskErrors / total) * 100).toFixed(0);
 
