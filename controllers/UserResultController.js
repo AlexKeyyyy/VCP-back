@@ -51,9 +51,26 @@ export const getResult = async (req, res) => {
     } = userTask;
 
     // Accessing nested fields in the `results` object inside `userTask`
-    const total = userTask.results.total;
-    const effortTotal = userTask.results.effortTotal;
-    const issuesCount = userTask.results.issues.length; // Counting the number of issues
+    let taskErrors = 0;
+    let taskVulnaribilities = 0;
+    let taskDefects = 0;
+
+    // Count the tags in the issues array
+    userTask.results.issues.forEach((issue) => {
+      if (issue.tags) {
+        issue.tags.forEach((tag) => {
+          if (tag == "error") {
+            taskErrors += 1;
+          }
+          if (tag == "badpractice") {
+            taskDefects += 1;
+          }
+        });
+      }
+    });
+
+    const total = taskErrors + taskVulnaribilities + taskDefects;
+    const taskPropriety = (100 - (taskErrors / total) * 100).toFixed(2);
 
     // Format the response data
     const responseData = {
@@ -64,9 +81,10 @@ export const getResult = async (req, res) => {
       updatedAt,
       taskText,
       codeText,
-      total,
-      effortTotal,
-      issuesCount,
+      taskErrors,
+      taskVulnaribilities,
+      taskDefects,
+      taskPropriety,
       commentAdmin,
       commentUser,
       mark,

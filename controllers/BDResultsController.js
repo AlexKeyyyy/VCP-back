@@ -146,7 +146,7 @@ export const commentAdmin = async (req, res) => {
 export const getSolutionDetails = async (req, res) => {
   try {
     const { taskNumber } = req.params;
-    const { name, surname, patro } = req.query;
+    const { name, surname, patro } = req.body;
 
     // Find the user by name, surname, and patro
     const user = await User.findOne({
@@ -192,14 +192,27 @@ export const getSolutionDetails = async (req, res) => {
       doneAt,
     } = userTask;
 
-    // Accessing nested fields in the `results` object inside `userTask`
-    const total = userTask.results.total;
-    const effortTotal = userTask.results.effortTotal;
-    const issuesCount = userTask.results.issues.length; // Counting the number of issues
+    // Initialize error and defect counts
+    let taskErrors = 0;
+    let taskVulnaribilities = 0;
+    let taskDefects = 0;
 
-    // You can also access specific issues or other nested data if needed
-    const specificIssue =
-      userTask.results.issues[0]?.description || "No issues";
+    // Count the tags in the issues array
+    userTask.results.issues.forEach((issue) => {
+      if (issue.tags) {
+        issue.tags.forEach((tag) => {
+          if (tag == "error") {
+            taskErrors += 1;
+          }
+          if (tag == "badpractice") {
+            taskDefects += 1;
+          }
+        });
+      }
+    });
+
+    const total = taskErrors + taskVulnaribilities + taskDefects;
+    const taskPropriety = (100 - (taskErrors / total) * 100).toFixed(2);
 
     // Format the response data
     const responseData = {
@@ -210,10 +223,10 @@ export const getSolutionDetails = async (req, res) => {
       updatedAt,
       taskText,
       codeText,
-      total,
-      effortTotal,
-      issuesCount,
-      specificIssue, // Just for demonstration, remove if not needed
+      taskErrors,
+      taskVulnaribilities,
+      taskDefects,
+      taskPropriety,
       commentAdmin,
       commentUser,
       mark,
