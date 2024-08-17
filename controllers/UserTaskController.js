@@ -62,6 +62,7 @@ export const sendCode = async (req, res) => {
     console.log(task.done);
     task.doneAt = new Date();
     task.status = "checking";
+    task.sonarStatus = "pending";
     //moment().tz("Europe/Moscow").format("YYYY-MM-DDTHH:mm:ss") + "Z";
 
     await task.save();

@@ -63,7 +63,7 @@ const TasksSchema = new mongoose.Schema(
     },
     sonarStatus: {
       type: String,
-      default: "pending",
+      default: "hah",
     },
 
     results: {
