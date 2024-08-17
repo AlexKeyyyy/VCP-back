@@ -210,9 +210,11 @@ export const getSolutionDetails = async (req, res) => {
       }
     });
 
+    let taskPropriety = 0;
     const total = taskErrors + taskVulnaribilities + taskDefects;
-    const taskPropriety = (100 - (taskErrors / total) * 100).toFixed(2);
-
+    if (total > 0) {
+      taskPropriety = (100 - (taskErrors / total) * 100).toFixed(2);
+    }
     // Format the response data
     const responseData = {
       name,

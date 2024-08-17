@@ -230,20 +230,39 @@ export const getProfile = async (req, res) => {
       userTasks.map(async (task) => {
         const taskData = await Tasks.findById(task.task_id);
 
-        // Защита от ошибок, если taskData или task.results отсутствуют
-        const results = task.results || {};
-        const total = results.total !== undefined ? results.total : "-";
-        const effortTotal = results.effortTotal !== undefined ? results.effortTotal : "-";
-        const issuesCount = results.issues ? results.issues.length : "-";
+        let taskErrors = 0;
+        let taskVulnaribilities = 0;
+        let taskDefects = 0;
+
+        task.results.issues.forEach((issue) => {
+          if (issue.tags) {
+            issue.tags.forEach((tag) => {
+              if (tag == "error") {
+                taskErrors += 1;
+              }
+              if (tag == "badpractice") {
+                taskDefects += 1;
+              }
+            });
+          }
+        });
+        let taskPropriety = 0;
+        const total = taskErrors + taskVulnaribilities + taskDefects;
+        if (total > 0) {
+          taskPropriety = (100 - (taskErrors / total) * 100).toFixed(2);
+        }
 
         return {
           taskNumber: taskData?.taskNumber || "N/A", // Если taskData не найден, вернем 'N/A'
           mark: task.mark,
           status: task.status,
           updatedAt: task.updatedAt,
+          taskErrors,
+          taskVulnaribilities,
+          taskDefects,
           total,
-          effortTotal,
-          issuesCount,
+          taskPropriety,
+          sonarStatus: task.sonarStatus,
         };
       })
     );
@@ -265,7 +284,6 @@ export const getProfile = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
-
 
 export const updateAvatar = async (req, res) => {
   try {
