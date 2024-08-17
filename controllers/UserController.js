@@ -209,13 +209,14 @@ export const getProfile = async (req, res) => {
 
     // Шаг 1: Найти все задания пользователя
     const userTasks = await UserTasks.find({ user_id: user_id });
+    const userTasksGraded = await UserTasks.find({ user_id: user_id, status: "graded"});
     let avatarPath = "N/A";
     if (avatarUrl) {
       avatarPath = `http://localhost:4445${avatarUrl}`;
     }
     // Шаг 2: Посчитать среднюю оценку
-    const totalMarks = userTasks.reduce((acc, task) => acc + task.mark, 0);
-    const averageMark = totalMarks / userTasks.length;
+    const totalMarks = userTasksGraded.reduce((acc, task) => acc + task.mark, 0);
+    const averageMarkTemp = totalMarks / userTasksGraded.length;
 
     // Шаг 3: Посчитать общее количество заданий
     const totalTasks = userTasks.length;
@@ -266,6 +267,29 @@ export const getProfile = async (req, res) => {
         };
       })
     );
+    let taskErrors = 0;
+    let taskVulnaribilities = 0;
+    let taskDefects = 0;
+
+    // Count the tags in the issues array
+    // UserTasks.find({user_id: user_id}).forEach((userTask) => {
+    //   userTask.results.issues.forEach((issue) => {
+    //     if (issue.tags) {
+    //       issue.tags.forEach((tag) => {
+    //         if (tag == "error") {
+    //           taskErrors += 1;
+    //         }
+    //         if (tag == "badpractice") {
+    //           taskDefects += 1;
+    //         }
+    //       });
+    //     }
+    //   })
+    // });
+    const averageMark = `${(isNaN(averageMarkTemp)) ? (0) : (averageMarkTemp.toFixed(2))}`;
+    console.log(averageMark);
+    const total = taskErrors + taskVulnaribilities + taskDefects;
+    const taskPropriety = (100 - (taskErrors / total) * 100).toFixed(0);
 
     // Возвращаем результат
     return res.json({
@@ -278,6 +302,10 @@ export const getProfile = async (req, res) => {
       patro,
       email,
       avatarUrl: avatarPath,
+      taskErrors,
+      taskVulnaribilities,
+      taskDefects,
+      taskPropriety
     });
   } catch (error) {
     console.error("Error in getProfile:", error);

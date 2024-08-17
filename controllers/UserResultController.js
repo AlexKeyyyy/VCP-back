@@ -5,7 +5,7 @@ import PDFDocument from "pdfkit";
 
 export const getResult = async (req, res) => {
   try {
-    const { taskNumber, user_id } = req.params;
+    const { user_id, taskNumber } = req.params;
 
     // Find the user by name, surname, and patro
     const user = await User.findById(user_id);

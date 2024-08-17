@@ -26,7 +26,7 @@ export const getTaskInfo = async (req, res) => {
       name: user.name,
       surname: user.surname,
       patronymic: user.patro, // Предполагается, что это поле называется patronymic
-      updatedAt: task.updatedAt,
+      createdAt: userTask.createdAt,
       taskText: task.taskText,
       taskNumber: task.taskNumber,
       commentAdmin: userTask.commentAdmin,
