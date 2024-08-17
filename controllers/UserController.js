@@ -234,59 +234,68 @@ export const getProfile = async (req, res) => {
 
     // Шаг 5: Создать массив с задачами
     const tasks = await Promise.all(
-      userTasks.map(async (task) => {
-        const taskData = await Tasks.findById(task.task_id);
+  userTasks.map(async (task) => {
+    const taskData = await Tasks.findById(task.task_id);
 
-        let taskErrors = 0;
-        let taskVulnaribilities = 0;
-        let taskDefects = 0;
+    let taskErrors = 0;
+    let taskVulnaribilities = 0;
+    let taskDefects = 0;
 
-        task.results.issues.forEach((issue) => {
-          if (issue.tags) {
-            issue.tags.forEach((tag) => {
-              if (tag == "error") {
-                taskErrors += 1;
-              }
-              if (tag == "badpractice") {
-                taskDefects += 1;
-              }
-            });
-          }
-        });
-        const errorWeight = 0.5;
-        const defectWeight = 0.2;
-        const vulnerabilityWeight = 0.3;
-
-        const totalIssues = taskErrors + taskDefects + taskVulnaribilities;
-        let weightedScore = 0;
-
-        if (totalIssues > 0) {
-          weightedScore = (
-            (taskErrors * errorWeight +
-              taskDefects * defectWeight +
-              taskVulnaribilities * vulnerabilityWeight) /
-            totalIssues
-          ).toFixed(2);
+    // Проверяем, что task.results и task.results.issues существуют
+    if (task.results && task.results.issues) {
+      task.results.issues.forEach((issue) => {
+        if (
+        issue.tags &&
+        issue.message !=
+          "Нужно заменить символ неразрывного пробела на обычный пробел"
+      ) {
+        if (issue.tags) {
+          issue.tags.forEach((tag) => {
+            if (tag === "error") {
+              taskErrors += 1;
+            }
+            if (tag === "badpractice") {
+              taskDefects += 1;
+            }
+          });
         }
+      }});
+    }
 
-        let taskPropriety = 0;
-        if (weightedScore > 0)
-          taskPropriety = (100 - weightedScore * 100).toFixed(2);
+    const errorWeight = 0.5;
+    const defectWeight = 0.2;
+    const vulnerabilityWeight = 0.3;
 
-        return {
-          taskNumber: taskData?.taskNumber || "N/A", // Если taskData не найден, вернем 'N/A'
-          mark: task.mark,
-          status: task.status,
-          updatedAt: task.updatedAt,
-          taskErrors,
-          taskVulnaribilities,
-          taskDefects,
-          totalIssues,
-          taskPropriety,
-          sonarStatus: task.sonarStatus,
-        };
-      })
-    );
+    const totalIssues = taskErrors + taskDefects + taskVulnaribilities;
+    let weightedScore = 0;
+
+    if (totalIssues > 0) {
+      weightedScore = (
+        (taskErrors * errorWeight +
+          taskDefects * defectWeight +
+          taskVulnaribilities * vulnerabilityWeight) /
+        totalIssues
+      ).toFixed(2);
+    }
+
+    let taskPropriety = 0;
+    if (weightedScore > 0)
+      taskPropriety = (100 - weightedScore * 100).toFixed(2);
+
+    return {
+      taskNumber: taskData?.taskNumber || "N/A", // Если taskData не найден, вернем 'N/A'
+      mark: task.mark,
+      status: task.status,
+      updatedAt: task.updatedAt,
+      taskErrors,
+      taskVulnaribilities,
+      taskDefects,
+      totalIssues,
+      taskPropriety,
+      sonarStatus: task.sonarStatus,
+    };
+  })
+);
     let taskErrors = 0;
     let taskVulnaribilities = 0;
     let taskDefects = 0;
@@ -324,10 +333,6 @@ export const getProfile = async (req, res) => {
       patro,
       email,
       avatarUrl: avatarPath,
-      taskErrors,
-      taskVulnaribilities,
-      taskDefects,
-      taskPropriety,
     });
   } catch (error) {
     console.error("Error in getProfile:", error);

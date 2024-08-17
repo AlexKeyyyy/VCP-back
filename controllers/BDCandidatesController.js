@@ -12,6 +12,7 @@ export const getCandidates = async (req, res) => {
       users.map(async (user) => {
         // Получаем задачи для пользователя
         const tasks = await UserTasks.find({ user_id: user._id });
+        console.log(tasks);
 
         // Вычисляем общие оценки и количество выполненных задач
         const totalMarks = tasks.reduce(
@@ -62,7 +63,7 @@ export const assignTasks = async (req, res) => {
     }
 
     const promises = choosedTaskNumbers.map(async (element) => {
-      const task = await Tasks.findOne({ taskNumber: element });
+      const task = await Tasks.findOne({ _id: element });
 
       if (!task) {
         throw new Error(`Задание с id ${element} не найдено.`);
