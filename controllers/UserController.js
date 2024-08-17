@@ -209,13 +209,19 @@ export const getProfile = async (req, res) => {
 
     // Шаг 1: Найти все задания пользователя
     const userTasks = await UserTasks.find({ user_id: user_id });
-    const userTasksGraded = await UserTasks.find({ user_id: user_id, status: "graded"});
+    const userTasksGraded = await UserTasks.find({
+      user_id: user_id,
+      status: "graded",
+    });
     let avatarPath = "N/A";
     if (avatarUrl) {
       avatarPath = `http://localhost:4445${avatarUrl}`;
     }
     // Шаг 2: Посчитать среднюю оценку
-    const totalMarks = userTasksGraded.reduce((acc, task) => acc + task.mark, 0);
+    const totalMarks = userTasksGraded.reduce(
+      (acc, task) => acc + task.mark,
+      0
+    );
     const averageMarkTemp = totalMarks / userTasksGraded.length;
 
     // Шаг 3: Посчитать общее количество заданий
@@ -247,11 +253,25 @@ export const getProfile = async (req, res) => {
             });
           }
         });
-        let taskPropriety = 0;
-        const total = taskErrors + taskVulnaribilities + taskDefects;
-        if (total > 0) {
-          taskPropriety = (100 - (taskErrors / total) * 100).toFixed(2);
+        const errorWeight = 0.5;
+        const defectWeight = 0.2;
+        const vulnerabilityWeight = 0.3;
+
+        const totalIssues = taskErrors + taskDefects + taskVulnaribilities;
+        let weightedScore = 0;
+
+        if (totalIssues > 0) {
+          weightedScore = (
+            (taskErrors * errorWeight +
+              taskDefects * defectWeight +
+              taskVulnaribilities * vulnerabilityWeight) /
+            totalIssues
+          ).toFixed(2);
         }
+
+        let taskPropriety = 0;
+        if (weightedScore > 0)
+          taskPropriety = (100 - weightedScore * 100).toFixed(2);
 
         return {
           taskNumber: taskData?.taskNumber || "N/A", // Если taskData не найден, вернем 'N/A'
@@ -261,7 +281,7 @@ export const getProfile = async (req, res) => {
           taskErrors,
           taskVulnaribilities,
           taskDefects,
-          total,
+          totalIssues,
           taskPropriety,
           sonarStatus: task.sonarStatus,
         };
@@ -286,7 +306,9 @@ export const getProfile = async (req, res) => {
     //     }
     //   })
     // });
-    const averageMark = `${(isNaN(averageMarkTemp)) ? (0) : (averageMarkTemp.toFixed(2))}`;
+    const averageMark = `${
+      isNaN(averageMarkTemp) ? 0 : averageMarkTemp.toFixed(2)
+    }`;
     console.log(averageMark);
     const total = taskErrors + taskVulnaribilities + taskDefects;
     const taskPropriety = (100 - (taskErrors / total) * 100).toFixed(0);
@@ -305,7 +327,7 @@ export const getProfile = async (req, res) => {
       taskErrors,
       taskVulnaribilities,
       taskDefects,
-      taskPropriety
+      taskPropriety,
     });
   } catch (error) {
     console.error("Error in getProfile:", error);

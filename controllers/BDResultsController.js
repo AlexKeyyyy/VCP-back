@@ -24,6 +24,7 @@ export const getSolutions = async (req, res) => {
               firstUpdate: task.createdAt, // время создания задания
               mark: task.mark, // оценка задания
               status: task.status,
+              sonarStatus: task.sonarStatus,
             };
           })
         );
@@ -210,11 +211,25 @@ export const getSolutionDetails = async (req, res) => {
       }
     });
 
-    let taskPropriety = 0;
-    const total = taskErrors + taskVulnaribilities + taskDefects;
-    if (total > 0) {
-      taskPropriety = (100 - (taskErrors / total) * 100).toFixed(2);
+    const errorWeight = 0.5;
+    const defectWeight = 0.2;
+    const vulnerabilityWeight = 0.3;
+
+    const totalIssues = taskErrors + taskDefects + taskVulnaribilities;
+    let weightedScore = 0;
+
+    if (totalIssues > 0) {
+      weightedScore = (
+        (taskErrors * errorWeight +
+          taskDefects * defectWeight +
+          taskVulnaribilities * vulnerabilityWeight) /
+        totalIssues
+      ).toFixed(2);
     }
+
+    let taskPropriety = 0;
+    if (weightedScore > 0)
+      taskPropriety = (100 - weightedScore * 100).toFixed(2);
     // Format the response data
     const responseData = {
       name,
