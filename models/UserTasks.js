@@ -69,6 +69,14 @@ const TasksSchema = new mongoose.Schema(
     results: {
       type: Object,
     },
+    mark_email: {
+      type: String,
+      default: "not",
+    },
+    sonar_email: {
+      type: String,
+      default: "not",
+    },
   },
   {
     timestamps: true,
