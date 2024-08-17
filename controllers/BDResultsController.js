@@ -330,16 +330,18 @@ export const makeTaskReport = async (req, res) => {
       doc.fontSize(12).text(`Ошибки отсутствуют.`);
     } else {
       issues.forEach((issue, index) => {
-        doc.fontSize(12).text(`Ошибка ${index + 1}:`);
-        doc.fontSize(12).text(`- Описание: ${issue.message}`);
-        doc.fontSize(12).text(`- Строка: ${issue.line}`);
-        doc.fontSize(12).text(`- Тип: ${issue.type}`);
-        doc.fontSize(12).text(`- Статус: ${issue.status}`);
-        doc.fontSize(12).text(`- Важность: ${issue.severity}`);
-        // doc
-        //   .fontSize(12)
-        //   .text(`- Рекомендуемое исправление: ${issue.recommendation}`);
-        doc.moveDown();
+        if (
+          issue.message !=
+          "Нужно заменить символ неразрывного пробела на обычный пробел"
+        ) {
+          doc.fontSize(12).text(`Ошибка ${index + 1}:`);
+          doc.fontSize(12).text(`- Описание: ${issue.message}`);
+          doc.fontSize(12).text(`- Строка: ${issue.line}`);
+          doc.fontSize(12).text(`- Тип: ${issue.type}`);
+          doc.fontSize(12).text(`- Статус: ${issue.status}`);
+          doc.fontSize(12).text(`- Важность: ${issue.severity}`);
+          doc.moveDown();
+        }
       });
     }
 

@@ -57,7 +57,11 @@ export const getResult = async (req, res) => {
 
     // Count the tags in the issues array
     userTask.results.issues.forEach((issue) => {
-      if (issue.tags) {
+      if (
+        issue.tags &&
+        issue.message !=
+          "Нужно заменить символ неразрывного пробела на обычный пробел"
+      ) {
         issue.tags.forEach((tag) => {
           if (tag == "error") {
             taskErrors += 1;
