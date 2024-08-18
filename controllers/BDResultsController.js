@@ -200,40 +200,83 @@ export const getSolutionDetails = async (req, res) => {
     let taskVulnaribilities = 0;
     let taskDefects = 0;
 
+    let taskErrorsINFO = 0;
+    let taskErrorsMINOR = 0;
+    let taskErrorsCRITICAL = 0;
+    let taskVulnaribilitiesINFO = 0;
+    let taskVulnaribilitiesMINOR = 0;
+    let taskVulnaribilitiesCRITICAL = 0;
+    let taskDefectsINFO = 0;
+    let taskDefectsMINOR = 0;
+    let taskDefectsCRITICAL = 0;
+
     // Count the tags in the issues array
     userTask.results.issues.forEach((issue) => {
+      if (
+        issue.tags &&
+        issue.message !=
+          "Нужно заменить символ неразрывного пробела на обычный пробел"
+      ) {
       if (issue.tags) {
         issue.tags.forEach((tag) => {
           if (tag == "error") {
-            taskErrors += 1;
+            taskErrors++;
+            if (issue.severity === "MINOR") {
+              taskErrorsMINOR++;
+            } else if (issue.severity === "CRITICAL") {
+              taskErrorsCRITICAL++;
+            } else {
+              taskErrorsINFO++;
+            }
           }
           if (tag == "badpractice") {
-            taskDefects += 1;
+            taskDefects++;
+            if (issue.severity === "MINOR") {
+              taskDefectsMINOR++;
+            } else if (issue.severity === "CRITICAL") {
+              taskDefectsCRITICAL++;
+            } else {
+              taskDefectsINFO++;
+            }
           }
         });
       }
+    }
     });
+    
 
-    const errorWeight = 0.5;
-    const defectWeight = 0.2;
-    const vulnerabilityWeight = 0.3;
+
+    const errorWeightINFO = 0.1;
+    const errorWeightMINOR = 0.2;
+    const errorWeightCRITICAL = 100;
+    const defectWeightINFO = 0.1;
+    const defectWeightMINOR = 0.2;
+    const defectWeightCRITICAL = 100;
+    const vulnerabilityWeightINFO = 0.3;
+    const vulnerabilityWeightMINOR = 0.5;
+    const vulnerabilityWeightCRITICAL = 100;
 
     const totalIssues = taskErrors + taskDefects + taskVulnaribilities;
+    
+
     let weightedScore = 0;
 
     if (totalIssues > 0) {
       weightedScore = (
-        (taskErrors * errorWeight +
-          taskDefects * defectWeight +
-          taskVulnaribilities * vulnerabilityWeight) /
+        (taskErrorsINFO * errorWeightINFO + taskErrorsMINOR * errorWeightMINOR + taskErrorsCRITICAL * errorWeightCRITICAL +
+          taskDefectsINFO * defectWeightINFO + taskDefectsMINOR * defectWeightMINOR + taskDefectsCRITICAL * defectWeightCRITICAL +
+          taskVulnaribilitiesINFO * vulnerabilityWeightINFO + taskVulnaribilitiesMINOR * vulnerabilityWeightMINOR + taskVulnaribilitiesCRITICAL * vulnerabilityWeightCRITICAL) /
         totalIssues
       ).toFixed(2);
     }
+    
 
     let taskPropriety = 0;
-    if (weightedScore > 0)
-      taskPropriety = (100 - weightedScore * 100).toFixed(2);
+    if (weightedScore > 0 && weightedScore < 10) {
+      taskPropriety = (100 - weightedScore * 100).toFixed(0);
+    }
     // Format the response data
+    
     const responseData = {
       name,
       surname,
@@ -355,6 +398,29 @@ export const makeTaskReport = async (req, res) => {
     var col1Left = doc.page.margins.left + 10;
     const col2Left = doc.page.width / 2;
 
+    let taskErrors = 0;
+    let taskVulnaribilities = 0;
+    let taskDefects = 0;
+    userTask.results.issues.forEach((issue) => {
+      if (
+        issue.tags &&
+        issue.message !=
+          "Нужно заменить символ неразрывного пробела на обычный пробел"
+      ) {
+      if (issue.tags) {
+        issue.tags.forEach((tag) => {
+          if (tag == "error") {
+            taskErrors++;
+          }
+          if (tag == "badpractice") {
+            taskDefects++;
+          }
+        });
+      }
+    }
+    });
+    const totalIssues = taskErrors + taskDefects + taskVulnaribilities;
+
     doc.font("Montserrat-SemiBold").fontSize(12).fillColor('black')
        .text('Кандидат', col1Left, tableTop);
 
@@ -371,7 +437,7 @@ export const makeTaskReport = async (req, res) => {
        .text('Всего ошибок', col1Left, tableTop + 60);
 
     doc.font("Montserrat-Light").fontSize(12).fillColor('black')
-       .text(`${total}`, col2Left, tableTop + 60);
+       .text(`${totalIssues}`, col2Left, tableTop + 60);
     
     doc.font("Montserrat-SemiBold").fontSize(12).fillColor('black')
        .text('', col1Left, tableTop + 60);
@@ -421,9 +487,9 @@ export const makeTaskReport = async (req, res) => {
         }
       });
 
-      console.log('Highlight Map:', Array.from(highlightMap.entries()));
-      let indexSeq = 1;
-      issues.forEach((issue, index) => {
+      
+      var indexSeq = 1;
+      issues.forEach((issue) => {
         if (issue.message !== "Нужно заменить символ неразрывного пробела на обычный пробел") {
           let severityColor;
           switch (issue.severity) {
@@ -472,8 +538,9 @@ export const makeTaskReport = async (req, res) => {
           if (doc.y > doc.page.height - 50) {
             addPageWithBackground(backgroundImagePath);
           }
+          indexSeq++;
         }
-        indexSeq++;
+        
       });
     }
 

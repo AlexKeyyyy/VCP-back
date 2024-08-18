@@ -241,46 +241,84 @@ export const getProfile = async (req, res) => {
     let taskVulnaribilities = 0;
     let taskDefects = 0;
 
-    // Проверяем, что task.results и task.results.issues существуют
-    if (task.results && task.results.issues) {
+    let taskErrorsINFO = 0;
+    let taskErrorsMINOR = 0;
+    let taskErrorsCRITICAL = 0;
+    let taskVulnaribilitiesINFO = 0;
+    let taskVulnaribilitiesMINOR = 0;
+    let taskVulnaribilitiesCRITICAL = 0;
+    let taskDefectsINFO = 0;
+    let taskDefectsMINOR = 0;
+    let taskDefectsCRITICAL = 0;
+
+    // Count the tags in the issues array
+     if (task.results && task.results.issues){
       task.results.issues.forEach((issue) => {
         if (
-        issue.tags &&
-        issue.message !=
-          "Нужно заменить символ неразрывного пробела на обычный пробел"
-      ) {
+          issue.tags &&
+          issue.message !=
+            "Нужно заменить символ неразрывного пробела на обычный пробел"
+        ) {
         if (issue.tags) {
           issue.tags.forEach((tag) => {
-            if (tag === "error") {
-              taskErrors += 1;
+            if (tag == "error") {
+              taskErrors++;
+              if (issue.severity === "MINOR") {
+                taskErrorsMINOR++;
+              } else if (issue.severity === "CRITICAL") {
+                taskErrorsCRITICAL++;
+              } else {
+                taskErrorsINFO++;
+              }
             }
-            if (tag === "badpractice") {
-              taskDefects += 1;
+            if (tag == "badpractice") {
+              taskDefects++;
+              if (issue.severity === "MINOR") {
+                taskDefectsMINOR++;
+              } else if (issue.severity === "CRITICAL") {
+                taskDefectsCRITICAL++;
+              } else {
+                taskDefectsINFO++;
+              }
             }
           });
         }
-      }});
-    }
+      }
+      });
+  };
+    
 
-    const errorWeight = 0.5;
-    const defectWeight = 0.2;
-    const vulnerabilityWeight = 0.3;
+
+    const errorWeightINFO = 0.1;
+    const errorWeightMINOR = 0.2;
+    const errorWeightCRITICAL = 100;
+    const defectWeightINFO = 0.1;
+    const defectWeightMINOR = 0.2;
+    const defectWeightCRITICAL = 100;
+    const vulnerabilityWeightINFO = 0.3;
+    const vulnerabilityWeightMINOR = 0.5;
+    const vulnerabilityWeightCRITICAL = 100;
 
     const totalIssues = taskErrors + taskDefects + taskVulnaribilities;
+    
+
     let weightedScore = 0;
 
     if (totalIssues > 0) {
       weightedScore = (
-        (taskErrors * errorWeight +
-          taskDefects * defectWeight +
-          taskVulnaribilities * vulnerabilityWeight) /
+        (taskErrorsINFO * errorWeightINFO + taskErrorsMINOR * errorWeightMINOR + taskErrorsCRITICAL * errorWeightCRITICAL +
+          taskDefectsINFO * defectWeightINFO + taskDefectsMINOR * defectWeightMINOR + taskDefectsCRITICAL * defectWeightCRITICAL +
+          taskVulnaribilitiesINFO * vulnerabilityWeightINFO + taskVulnaribilitiesMINOR * vulnerabilityWeightMINOR + taskVulnaribilitiesCRITICAL * vulnerabilityWeightCRITICAL) /
         totalIssues
       ).toFixed(2);
     }
+    
 
     let taskPropriety = 0;
-    if (weightedScore > 0)
-      taskPropriety = (100 - weightedScore * 100).toFixed(2);
+    if (weightedScore > 0 && weightedScore < 10) {
+      taskPropriety = (100 - weightedScore * 100).toFixed(0);
+    }
+    console.log(taskPropriety);
 
     return {
       taskNumber: taskData?.taskNumber || "N/A", // Если taskData не найден, вернем 'N/A'
@@ -300,21 +338,6 @@ export const getProfile = async (req, res) => {
     let taskVulnaribilities = 0;
     let taskDefects = 0;
 
-    // Count the tags in the issues array
-    // UserTasks.find({user_id: user_id}).forEach((userTask) => {
-    //   userTask.results.issues.forEach((issue) => {
-    //     if (issue.tags) {
-    //       issue.tags.forEach((tag) => {
-    //         if (tag == "error") {
-    //           taskErrors += 1;
-    //         }
-    //         if (tag == "badpractice") {
-    //           taskDefects += 1;
-    //         }
-    //       });
-    //     }
-    //   })
-    // });
     const averageMark = `${
       isNaN(averageMarkTemp) ? 0 : averageMarkTemp.toFixed(2)
     }`;
