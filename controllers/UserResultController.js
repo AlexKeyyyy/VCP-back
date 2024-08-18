@@ -2,6 +2,9 @@ import Tasks from "../models/Tasks.js";
 import User from "../models/User.js";
 import UserTasks from "../models/UserTasks.js";
 import PDFDocument from "pdfkit";
+import fs from 'fs';
+import path from 'path';
+import DOMPurify from 'dompurify';
 
 export const getResult = async (req, res) => {
   try {
@@ -124,41 +127,57 @@ export const makeUserReport = async (req, res) => {
   try {
     const { taskNumber, user_id } = req.params;
 
-    // Find the user by name, surname, and patro
+    // Поиск пользователя по ID
     const user = await User.findById(user_id);
-
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     const { name, surname, patro } = user;
 
-    // Находим задачу по taskNumber
+    // Поиск задачи по taskNumber
     const task = await Tasks.findOne({ taskNumber: taskNumber });
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    // Находим задачу пользователя
+    // Поиск задачи пользователя
     const userTask = await UserTasks.findOne({
       user_id: user._id,
       task_id: task._id,
     });
-
     if (!userTask) {
       return res.status(404).json({ message: "User task not found" });
     }
 
     const { codeText } = userTask;
-
-    // Извлекаем данные из results
     const { total, effortTotal, issues } = userTask.results;
 
     // Создаем новый PDF документ
-    const doc = new PDFDocument();
-    const fontPath = "OpenSans_Condensed-Medium.ttf"; // Укажите путь к вашему файлу шрифта
-    doc.registerFont("OpenSans", fontPath);
-    doc.font("OpenSans");
+    const doc = new PDFDocument({ autoFirstPage: false });
+
+    const titleImagePath = path.resolve('./uploads/PDF/ReportTitle.png');
+    const backgroundImagePath = path.resolve('./uploads/PDF/ReportBack.png');
+    const codeImagePath = path.resolve('./uploads/PDF/ReportCode.png');
+
+    doc.registerFont("Montserrat-ExtraLight", "Montserrat-ExtraLight.ttf");
+    doc.registerFont("Montserrat-Light", "Montserrat-Light.ttf");
+    doc.registerFont("Montserrat-Regular", "Montserrat-Regular.ttf");
+    doc.registerFont("Montserrat-Medium", "Montserrat-Medium.ttf");
+    doc.registerFont("Montserrat-SemiBold", "Montserrat-SemiBold.ttf");
+    doc.registerFont("Montserrat-Bold", "Montserrat-Bold.ttf");
+
+    const addPageWithBackground = (imagePath) => {
+      doc.addPage();
+      doc.image(imagePath, 0, 0, {
+        width: doc.page.width,
+        height: doc.page.height,
+        opacity: 0.1,
+        align: 'center',
+        valign: 'center'
+      });
+    };
+
     let buffers = [];
     doc.on("data", buffers.push.bind(buffers));
     doc.on("end", () => {
@@ -172,61 +191,210 @@ export const makeUserReport = async (req, res) => {
         .end(pdfData);
     });
 
-    // Заполняем PDF документ данными задачи
+    addPageWithBackground(titleImagePath);
+
+    // Заголовок и информация о пользователе
     doc
-      .fontSize(14)
-      .text(`Отчет по задаче №${taskNumber}`, { underline: true });
+      .font("Montserrat-Bold")
+      .fontSize(20)
+      .fillColor('black')
+      .text(`Отчет по задаче №${taskNumber}`, { align: 'center' });
+
+    doc.moveDown(0.5);
+
     doc
-      .fontSize(12)
-      .text(
-        `Кандидат: ${user.name} ${user.surname} ${user.patro} (${user.email})`
-      );
-    doc.fontSize(12).text(`Всего ошибок: ${total}`);
-    doc.fontSize(12).text(`Общая оценка усилий: ${effortTotal}`);
+      .moveTo(doc.page.margins.left, doc.y)
+      .lineTo(doc.page.width - doc.page.margins.right, doc.y)
+      .strokeColor('#c4c4c4')
+      .stroke();
+
+    doc.moveDown(1);
+
+    doc.roundedRect(doc.page.margins.left, doc.y, doc.page.width - doc.page.margins.left * 2, 90, 10)
+       .stroke();
+       
+    const tableTop = doc.y + 10;
+    const col1Left = doc.page.margins.left + 10;
+    const col2Left = doc.page.width / 2;
+
+    doc.font("Montserrat-SemiBold").fontSize(12).fillColor('black')
+       .text('Кандидат', col1Left, tableTop);
+
+    doc.font("Montserrat-Light").fontSize(12).fillColor('black')
+       .text(`${user.surname} ${user.name} ${user.patro}`, col2Left, tableTop);
+
+    doc.font("Montserrat-SemiBold").fontSize(12).fillColor('black')
+       .text('Email', col1Left, tableTop + 30);
+
+    doc.font("Montserrat-Light").fontSize(12).fillColor('#2D8AEE')
+       .text(`${user.email}`, col2Left, tableTop + 30);
+       
+    doc.font("Montserrat-SemiBold").fontSize(12).fillColor('black')
+       .text('Всего ошибок', col1Left, tableTop + 60);
+
+    doc.font("Montserrat-Light").fontSize(12).fillColor('black')
+       .text(`${total}`, col2Left, tableTop + 60);
+
+    doc.font("Montserrat-SemiBold").fontSize(12).fillColor('black')
+       .text('', col1Left, tableTop + 60);
+
+    // doc.font("Montserrat-SemiBold").fontSize(12).fillColor('black')
+    //    .text('Общая оценка усилий', col1Left, tableTop + 60);
+
+    // doc.font("Montserrat-Light").fontSize(12).fillColor('black')
+    //    .text(`${effortTotal}`, col2Left, tableTop + 60);
+    doc.moveDown(27.2);
+
+    const subject = `[ОЭ ${new Date().toLocaleDateString()}][${user._id}][${taskNumber}][SonarQube] Запрос поддержки от ${user.surname} ${user.name} ${user.patro}`;
+    const body = `Добрый день!\n\nОписание проблемы: (опишите, что случилось)\nПриоритет: от 1 до 4 (1 - срочный, 4 - некритичный)\nЖелаемая дата окончания сопровождения: (проставьте желаемую дату разрешения вопроса)\n\n___\nС уважением,\nпользователь платформы проверки тестовых заданий\n${user.surname} ${user.name} ${user.patro}`;
+    const mailtoLink = `mailto:VCP@mail.ru?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    doc.font("Montserrat-SemiBold").fontSize(14).fillColor('#c4c4c4')
+       .text('ПОДДЕРЖКА', {
+         align: 'center',
+         link: mailtoLink,
+        //  underline: true
+       })
+
+    doc.moveDown(5);
+
+    addPageWithBackground(backgroundImagePath);
+
+    // Секция с ошибками
+    doc
+      .font("Montserrat-Bold")
+      .fontSize(20)
+      .fillColor('black')
+      .text(`Ошибки`, { align: 'center' });
+    
+    doc
+      .moveTo(doc.page.margins.left, doc.y)
+      .lineTo(doc.page.width - doc.page.margins.right, doc.y)
+      .strokeColor('black')
+      .stroke();
+
     doc.moveDown();
 
-    // Описание issues
-    doc.fontSize(12).text(`Ошибки:`);
     if (issues.length === 0) {
-      doc.fontSize(12).text(`Ошибки отсутствуют.`);
+      doc.fontSize(10).fillColor('black').text(`Ошибки отсутствуют.`);
     } else {
-      issues.forEach((issue, index) => {
-        if (
-          issue.message !=
-          "Нужно заменить символ неразрывного пробела на обычный пробел"
-        ) {
-          doc.fontSize(12).text(`Ошибка ${index + 1}:`);
-          doc.fontSize(12).text(`- Описание: ${issue.message}`);
-          doc.fontSize(12).text(`- Строка: ${issue.line}`);
-          doc.fontSize(12).text(`- Тип: ${issue.type}`);
-          doc.fontSize(12).text(`- Статус: ${issue.status}`);
-          doc.fontSize(12).text(`- Важность: ${issue.severity}`);
-          doc.moveDown();
+      var highlightMap = new Map();
+      issues.forEach(issue => {
+        if (issue.message !== "Нужно заменить символ неразрывного пробела на обычный пробел") {
+          highlightMap.set(issue.line, issue.severity);
         }
+      });
+
+      console.log('Highlight Map:', Array.from(highlightMap.entries()));
+      let indexSeq = 1;
+      issues.forEach((issue, index) => {
+        if (issue.message !== "Нужно заменить символ неразрывного пробела на обычный пробел") {
+          let severityColor;
+          switch (issue.severity) {
+            case "INFO":
+              severityColor = '#49c450'; 
+              break;
+            case "MINOR":
+              severityColor = '#debe5b'; 
+              break;
+            case "CRITICAL":
+              severityColor = '#e23333'; 
+              break;
+            default:
+              severityColor = '#c4c4c4';
+              break;
+          }
+
+          doc
+            .font("Montserrat-SemiBold")
+            .fontSize(12)
+            .fillColor(severityColor)
+            .text(`Ошибка ${indexSeq} [${issue.severity}]`, { align: 'left' });
+
+          doc
+            .font("Montserrat-Medium")
+            .fontSize(10)
+            .fillColor('black')
+            .text(`Описание:`, { continued: true });
+
+          doc
+            .font("Montserrat-Light")
+            .text(` ${issue.message}`, { continued: false });
+
+          doc
+            .font("Montserrat-Medium")
+            .fontSize(10)
+            .fillColor('black')
+            .text(`Строка:`, { continued: true });
+
+          doc
+            .font("Montserrat-Light")
+            .text(` ${issue.line}`, { continued: false });
+
+          doc.moveDown();
+
+          if (doc.y > doc.page.height - 50) {
+            addPageWithBackground(backgroundImagePath);
+          }
+        }
+        indexSeq++;
       });
     }
 
-    // Добавляем текст кода в PDF
-    doc.addPage(); // Добавляем новую страницу для кода
-    doc.fontSize(14).text("Исходный код:", { underline: true });
+    addPageWithBackground(codeImagePath);
+
+    // Секция с исходным кодом
+    doc
+      .font("Montserrat-Bold")
+      .fontSize(20)
+      .fillColor('black')
+      .text("Исходный код", { align: 'center', underline: false });
+
+    doc
+      .moveTo(doc.page.margins.left, doc.y)
+      .lineTo(doc.page.width - doc.page.margins.right, doc.y)
+      .strokeColor('black')
+      .stroke();
+
+    doc.moveDown(2);
+
     if (codeText) {
-      const codeLines = codeText.split("\n"); // Разбиваем код на строки
+      const codeLines = codeText.split("\n");
+
       codeLines.forEach((line, index) => {
-        // Добавляем номер строки перед каждой строкой кода
-        const lineNumber = (index + 1).toString().padStart(4, " "); // Форматируем номер строки
-        doc.fontSize(10).text(`${lineNumber}: ${line}`, {
+        const lineNumber = (index + 1).toString().padStart(4, " ");
+        const lineColor = highlightMap.has(index + 1)
+          ? highlightMap.get(index + 1)
+          : "black";
+        
+        const lineNumberColor = {
+          'INFO': '#49c450',
+          'MINOR': '#debe5b',
+          'CRITICAL': '#e23333'
+        }[lineColor] || 'black'; 
+
+        doc
+          .font("Montserrat-Medium")
+          .fontSize(10)
+          .fillColor(lineNumberColor) 
+          .text(`${lineNumber}     `, { continued: true });
+
+        doc.font("Montserrat-Light").fontSize(10).fillColor(lineColor).text(`${line}`, {
           align: "left",
           paragraphGap: 2,
           lineGap: 2,
           indent: 10,
-          continued: false,
+          continued: false
         });
+
+        if (doc.y > doc.page.height - 50) {
+          addPageWithBackground(backgroundImagePath);
+        }
       });
     } else {
-      doc.fontSize(12).text("Код отсутствует.");
+      doc.font("Montserrat-Regular").fontSize(10).text("Код отсутствует.");
     }
 
-    // Завершаем PDF документ
     doc.end();
   } catch (error) {
     console.error(error);

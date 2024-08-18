@@ -352,7 +352,7 @@ export const makeTaskReport = async (req, res) => {
        .stroke();
        
     const tableTop = doc.y + 10;
-    const col1Left = doc.page.margins.left + 10;
+    var col1Left = doc.page.margins.left + 10;
     const col2Left = doc.page.width / 2;
 
     doc.font("Montserrat-SemiBold").fontSize(12).fillColor('black')
@@ -372,13 +372,27 @@ export const makeTaskReport = async (req, res) => {
 
     doc.font("Montserrat-Light").fontSize(12).fillColor('black')
        .text(`${total}`, col2Left, tableTop + 60);
+    
+    doc.font("Montserrat-SemiBold").fontSize(12).fillColor('black')
+       .text('', col1Left, tableTop + 60);
 
     // doc.font("Montserrat-SemiBold").fontSize(12).fillColor('black')
     //    .text('Общая оценка усилий', col1Left, tableTop + 60);
 
     // doc.font("Montserrat-Light").fontSize(12).fillColor('black')
     //    .text(`${effortTotal}`, col2Left, tableTop + 60);
+    doc.moveDown(27.2);
 
+    const subject = `[ОЭ ${new Date().toLocaleDateString()}][${user._id}][${taskNumber}][SonarQube] Запрос поддержки от Admin`;
+    const body = `Добрый день!\n\nОписание проблемы: (опишите, что случилось)\nПриоритет: от 1 до 4 (1 - срочный, 4 - некритичный)\nЖелаемая дата окончания сопровождения: (проставьте желаемую дату разрешения вопроса)\n\n___\nС уважением,\nпользователь платформы проверки тестовых заданий\n${user.surname} ${user.name} ${user.patro}`;
+    const mailtoLink = `mailto:VCP@mail.ru?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    doc.font("Montserrat-SemiBold").fontSize(14).fillColor('#c4c4c4')
+       .text('ПОДДЕРЖКА', {
+         align: 'center',
+         link: mailtoLink,
+        //  underline: true
+       })
     doc.moveDown(5);
 
     addPageWithBackground(backgroundImagePath);
@@ -408,7 +422,7 @@ export const makeTaskReport = async (req, res) => {
       });
 
       console.log('Highlight Map:', Array.from(highlightMap.entries()));
-
+      let indexSeq = 1;
       issues.forEach((issue, index) => {
         if (issue.message !== "Нужно заменить символ неразрывного пробела на обычный пробел") {
           let severityColor;
@@ -431,7 +445,7 @@ export const makeTaskReport = async (req, res) => {
             .font("Montserrat-SemiBold")
             .fontSize(12)
             .fillColor(severityColor)
-            .text(`Ошибка ${index + 1} [${issue.severity}]`, { align: 'left' });
+            .text(`Ошибка ${indexSeq} [${issue.severity}]`, { align: 'left' });
 
           doc
             .font("Montserrat-Medium")
@@ -459,6 +473,7 @@ export const makeTaskReport = async (req, res) => {
             addPageWithBackground(backgroundImagePath);
           }
         }
+        indexSeq++;
       });
     }
 
