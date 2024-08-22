@@ -81,6 +81,10 @@ const TasksSchema = new mongoose.Schema(
       type: String,
       default: "not",
     },
+    all_task_email: {
+      type: String,
+      default: "not",
+    },
   },
   {
     timestamps: true,
