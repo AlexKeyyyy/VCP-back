@@ -28,6 +28,10 @@ const UserSchema = new mongoose.Schema(
       default: "user",
       required: true,
     },
+    new_user_email: {
+      type: String,
+      default: "not",
+    },
     avatarUrl: String,
   },
   {
