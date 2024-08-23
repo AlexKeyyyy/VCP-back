@@ -308,7 +308,7 @@ export const makeUserReport = async (req, res) => {
 
     const subject = `[ОЭ ${new Date().toLocaleDateString()}][${user._id}][${taskNumber}][SonarQube] Запрос поддержки от ${user.surname} ${user.name} ${user.patro}`;
     const body = `Добрый день!\n\nОписание проблемы: (опишите, что случилось)\nПриоритет: от 1 до 4 (1 - срочный, 4 - некритичный)\nЖелаемая дата окончания сопровождения: (проставьте желаемую дату разрешения вопроса)\n\n___\nС уважением,\nпользователь платформы проверки тестовых заданий\n${user.surname} ${user.name} ${user.patro}`;
-    const mailtoLink = `mailto:VCP@mail.ru?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailtoLink = `mailto:vcp-tech-support@mail.ru?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     doc.font("Montserrat-SemiBold").fontSize(14).fillColor('#c4c4c4')
        .text('ПОДДЕРЖКА', {
