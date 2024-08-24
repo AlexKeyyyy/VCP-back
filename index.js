@@ -1,5 +1,5 @@
 import express from "express";
-import session from 'express-session';
+import session from "express-session";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import {
@@ -22,7 +22,7 @@ import * as UserResultController from "./controllers/UserResultController.js";
 import multer from "multer";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
-import helmet from 'helmet';
+import helmet from "helmet";
 import csurf from "csurf";
 import cookieparser from "cookie-parser";
 import Tasks from "./models/Tasks.js";
@@ -52,27 +52,34 @@ const upload = multer({ storage });
 app.use(express.json());
 app.use(cors());
 app.use("/uploads", express.static("uploads"));
-app.use(session({
+app.use(
+  session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true, httpOnly: true, sameSite: 'strict' }
-}));
+    cookie: { secure: true, httpOnly: true, sameSite: "strict" },
+  })
+);
 
 // Error handling без раскрытия информации
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ message: 'Internal server error' });
+  console.error(err.stack);
+  res.status(500).json({ message: "Internal server error" });
 });
 app.use((req, res, next) => {
-    res.setHeader("Content-Security-Policy", "default-src 'self'; img-src *; script-src 'self'; style-src 'self'");
-    next();
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; img-src *; script-src 'self'; style-src 'self'"
+  );
+  next();
 });
-app.use(helmet.hsts({
-  maxAge: 15552000, // 180 дней в секундах
-  includeSubDomains: true, // Применять HSTS ко всем поддоменам
-  preload: true
-}));
+app.use(
+  helmet.hsts({
+    maxAge: 15552000, // 180 дней в секундах
+    includeSubDomains: true, // Применять HSTS ко всем поддоменам
+    preload: true,
+  })
+);
 app.post("/upload", upload.single("image"), (req, res) => {
   res.json({
     url: `/uploads/${req.file.originalname}`,
@@ -83,7 +90,7 @@ app.post("/upload", upload.single("image"), (req, res) => {
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 минут
   max: 5, // Максимум 5 попыток с одного IP
-  message: "Слишком много попыток входа. Попробуйте снова через 15 минут."
+  message: "Слишком много попыток входа. Попробуйте снова через 15 минут.",
 });
 // Логин
 app.post(
@@ -175,7 +182,7 @@ app.get("/admin-get-bd-tasks", BDTasksController.getAllTasks);
 app.patch("/admin-patch-task-edit/:taskNumber", BDTasksController.editTask);
 
 //Удаление задачи из БД Tasks
-app.delete("/admin-delete-task/:taskNumber", BDTasksController.deleteTask);
+app.post("/admin-delete-task/:taskNumber", BDTasksController.deleteTask);
 
 //Добавление задачи в БД Tasks
 app.post("/admin-post-task-add/:taskNumber", BDTasksController.addTask);

@@ -4,7 +4,7 @@ import Tasks from "../models/Tasks.js";
 
 export const getAllTasks = async (req, res) => {
   try {
-    const allTasks = await Tasks.find().exec();
+    const allTasks = await Tasks.find({ status: { $ne: "deleted" } }).exec();
 
     return res.status(200).json(allTasks);
   } catch (error) {
@@ -22,7 +22,7 @@ export const editTask = async (req, res) => {
 
     const updatedTask = await Tasks.findOneAndUpdate(
       { taskNumber: taskNumber },
-      { $set: { taskText } },
+      { $set: { taskText, status: "modified" } },
       { new: true }
     );
 
@@ -45,9 +45,11 @@ export const deleteTask = async (req, res) => {
   try {
     const { taskNumber } = req.params;
 
-    const deletedTask = await Tasks.findOneAndDelete({
-      taskNumber: taskNumber,
-    });
+    const deletedTask = await Tasks.findOneAndUpdate(
+      { taskNumber: taskNumber },
+      { $set: { status: "deleted" } },
+      { new: true }
+    );
 
     return res.status(200).json(deletedTask);
   } catch (error) {
@@ -87,16 +89,20 @@ export const getNotAssignedTasks = async (req, res) => {
       return res.status(404).json({ message: "Пользователь не найден." });
     }
 
-    const userTasks = await UserTasks.find({ user_id: user._id }).select('task_id');
-    const assignedTaskIds = userTasks.map(userTask => userTask.task_id);
+    const userTasks = await UserTasks.find({ user_id: user._id }).select(
+      "task_id"
+    );
+    const assignedTaskIds = userTasks.map((userTask) => userTask.task_id);
 
     const notAssignedTasks = await Tasks.find({
-      _id: { $nin: assignedTaskIds }
+      _id: { $nin: assignedTaskIds },
     });
 
     return res.status(200).json(notAssignedTasks);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Не удалось получить список незачисленных задач." });
+    res
+      .status(500)
+      .json({ message: "Не удалось получить список незачисленных задач." });
   }
 };
