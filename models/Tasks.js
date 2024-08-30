@@ -24,6 +24,22 @@ const TasksSchema = new mongoose.Schema(
       default: [],
       required: false,
     },
+    status: {
+      type: String,
+      default: "new",
+    },
+    new_email: {
+      type: String,
+      default: "not",
+    },
+    modified_email: {
+      type: String,
+      default: "not",
+    },
+    deleted_email: {
+      type: String,
+      default: "not",
+    },
   },
   {
     timestamps: true,

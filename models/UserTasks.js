@@ -54,6 +54,37 @@ const TasksSchema = new mongoose.Schema(
       type: Date,
       required: false,
     },
+    status: {
+      type: String,
+      default: "assigned",
+    },
+    checkedAt: {
+      type: Date,
+    },
+    sonarStatus: {
+      type: String,
+      default: "hah",
+    },
+
+    results: {
+      type: Object,
+    },
+    mark_email: {
+      type: String,
+      default: "not",
+    },
+    sonar_email: {
+      type: String,
+      default: "not",
+    },
+    new_task_email: {
+      type: String,
+      default: "not",
+    },
+    all_task_email: {
+      type: String,
+      default: "not",
+    },
   },
   {
     timestamps: true,

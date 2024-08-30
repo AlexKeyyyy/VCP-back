@@ -1,6 +1,8 @@
 import bcrypt from "bcrypt";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
+import UserTasks from "../models/UserTasks.js";
+import Tasks from "../models/Tasks.js";
 import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
@@ -10,10 +12,12 @@ export const register = async (req, res) => {
     const hash = await bcrypt.hash(password, salt);
 
     const doc = new User({
-      fullName: req.body.fullName,
+      name: req.body.name,
+      surname: req.body.surname,
+      patro: req.body.patro,
       email: req.body.email,
       passwordHash: hash,
-      avatarUrl: req.body.avatarUrl
+      avatarUrl: req.body.avatarUrl,
     });
 
     const admin = await Admin.findOne({ email: req.body.email });
@@ -30,7 +34,7 @@ export const register = async (req, res) => {
       {
         _id: user._id,
       },
-      "secret",
+      process.env.JWT_SECRET,
       {
         expiresIn: "30d",
       }
@@ -73,7 +77,7 @@ export const login = async (req, res) => {
       {
         _id: user._id,
       },
-      "secret",
+      process.env.JWT_SECRET,
       {
         expiresIn: "30d",
       }
@@ -176,5 +180,245 @@ export const getUser = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Ошибка сервера" });
+  }
+};
+
+export const writeEmail = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const user = await User.findById(user_id).select(
+      "name surname patro email"
+    );
+    if (!user) {
+      return res.status(404).json({ message: "Пользователь не найден" });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error("Ошибка при получении данных пользователя:", error);
+    res.status(500).json({ message: "Ошибка сервера" });
+  }
+};
+
+export const getProfile = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    const user = await User.findById(user_id);
+
+    const { name, surname, patro, email, avatarUrl } = user;
+
+    // Шаг 1: Найти все задания пользователя
+    const userTasks = await UserTasks.find({ user_id: user_id });
+    const userTasksGraded = await UserTasks.find({
+      user_id: user_id,
+      status: "graded",
+    });
+    let avatarPath = "N/A";
+    if (avatarUrl) {
+      avatarPath = `http://localhost:4445${avatarUrl}`;
+    }
+    // Шаг 2: Посчитать среднюю оценку
+    const totalMarks = userTasksGraded.reduce(
+      (acc, task) => acc + task.mark,
+      0
+    );
+    const averageMarkTemp = totalMarks / userTasksGraded.length;
+
+    // Шаг 3: Посчитать общее количество заданий
+    const totalTasks = userTasks.length;
+
+    // Шаг 4: Посчитать количество заданий со статусом 'checking'
+    const checkingTasksCount = userTasks.filter(
+      (task) => task.status === "checking"
+    ).length;
+
+    // Шаг 5: Создать массив с задачами
+    const tasks = await Promise.all(
+  userTasks.map(async (task) => {
+    const taskData = await Tasks.findById(task.task_id);
+
+    let taskErrors = 0;
+    let taskVulnaribilities = 0;
+    let taskDefects = 0;
+
+    let taskErrorsINFO = 0;
+    let taskErrorsMINOR = 0;
+    let taskErrorsCRITICAL = 0;
+    let taskVulnaribilitiesINFO = 0;
+    let taskVulnaribilitiesMINOR = 0;
+    let taskVulnaribilitiesCRITICAL = 0;
+    let taskDefectsINFO = 0;
+    let taskDefectsMINOR = 0;
+    let taskDefectsCRITICAL = 0;
+
+    // Count the tags in the issues array
+     if (task.results && task.results.issues){
+      task.results.issues.forEach((issue) => {
+        if (
+          issue.tags &&
+          issue.message !=
+            "Нужно заменить символ неразрывного пробела на обычный пробел"
+        ) {
+        if (issue.tags) {
+          issue.tags.forEach((tag) => {
+            if (tag == "error") {
+              taskErrors++;
+              if (issue.severity === "MINOR") {
+                taskErrorsMINOR++;
+              } else if (issue.severity === "CRITICAL") {
+                taskErrorsCRITICAL++;
+              } else {
+                taskErrorsINFO++;
+              }
+            }
+            if (tag == "badpractice") {
+              taskDefects++;
+              if (issue.severity === "MINOR") {
+                taskDefectsMINOR++;
+              } else if (issue.severity === "CRITICAL") {
+                taskDefectsCRITICAL++;
+              } else {
+                taskDefectsINFO++;
+              }
+            }
+          });
+        }
+      }
+      });
+  };
+    
+
+
+    const errorWeightINFO = 0.1;
+    const errorWeightMINOR = 0.2;
+    const errorWeightCRITICAL = 100;
+    const defectWeightINFO = 0.1;
+    const defectWeightMINOR = 0.2;
+    const defectWeightCRITICAL = 100;
+    const vulnerabilityWeightINFO = 0.3;
+    const vulnerabilityWeightMINOR = 0.5;
+    const vulnerabilityWeightCRITICAL = 100;
+
+    const totalIssues = taskErrors + taskDefects + taskVulnaribilities;
+    
+
+    let weightedScore = 0;
+
+    if (totalIssues > 0) {
+      weightedScore = (
+        (taskErrorsINFO * errorWeightINFO + taskErrorsMINOR * errorWeightMINOR + taskErrorsCRITICAL * errorWeightCRITICAL +
+          taskDefectsINFO * defectWeightINFO + taskDefectsMINOR * defectWeightMINOR + taskDefectsCRITICAL * defectWeightCRITICAL +
+          taskVulnaribilitiesINFO * vulnerabilityWeightINFO + taskVulnaribilitiesMINOR * vulnerabilityWeightMINOR + taskVulnaribilitiesCRITICAL * vulnerabilityWeightCRITICAL) /
+        totalIssues
+      ).toFixed(2);
+    }
+    
+
+    let taskPropriety = 0;
+    if (weightedScore > 0 && weightedScore < 10) {
+      taskPropriety = (100 - weightedScore * 100).toFixed(0);
+    }
+    console.log(taskPropriety);
+
+    return {
+      taskNumber: taskData?.taskNumber || "N/A", // Если taskData не найден, вернем 'N/A'
+      mark: task.mark,
+      status: task.status,
+      updatedAt: task.updatedAt,
+      taskErrors,
+      taskVulnaribilities,
+      taskDefects,
+      totalIssues,
+      taskPropriety,
+      sonarStatus: task.sonarStatus,
+    };
+  })
+);
+    let taskErrors = 0;
+    let taskVulnaribilities = 0;
+    let taskDefects = 0;
+
+    const averageMark = `${
+      isNaN(averageMarkTemp) ? 0 : averageMarkTemp.toFixed(2)
+    }`;
+    console.log(averageMark);
+    const total = taskErrors + taskVulnaribilities + taskDefects;
+    const taskPropriety = (100 - (taskErrors / total) * 100).toFixed(0);
+
+    // Возвращаем результат
+    return res.json({
+      averageMark,
+      totalTasks,
+      checkingTasksCount,
+      tasks,
+      name,
+      surname,
+      patro,
+      email,
+      avatarUrl: avatarPath,
+    });
+  } catch (error) {
+    console.error("Error in getProfile:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const updateAvatar = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Файл не загружен" });
+    }
+
+    const avatarUrl = `/uploads/${req.file.filename}`;
+    const updatedUser = await User.findByIdAndUpdate(
+      user_id,
+      { avatarUrl },
+      { new: true } // Возвращает обновленный документ
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "Пользователь не найден" });
+    }
+
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: "Ошибка сервера", error });
+  }
+};
+
+export const updateProfileData = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    console.log("User ID:", user_id); // Добавляем лог для проверки userId
+
+    let updateData = req.body;
+    console.log("Update Data:", updateData); // Добавляем лог для проверки updateData
+
+    if (updateData.password) {
+      // Хеширование нового пароля
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(updateData.password, salt);
+
+      // Заменяем пароль в объекте updateData на его хеш
+      updateData = { ...updateData, passwordHash };
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(user_id, updateData, {
+      new: true,
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "Пользователь не найден" });
+    }
+
+    // Отправляем обновленные данные пользователя в ответе
+    res.json(updatedUser);
+  } catch (err) {
+    console.log(err);
+    res
+      .status(500)
+      .json({ message: "Не удалось обновить данные пользователя" });
   }
 };
