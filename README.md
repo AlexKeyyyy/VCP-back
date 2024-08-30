@@ -60,18 +60,18 @@ A platform for checking test tasks in 1C for a customer from BIA Technologies. I
 2. Install dependencies:
 
 ```bash
-npm install
+ npm install
 ```
 
 3. Set up environment variables: Create a .env file in the root directory with the following
 
 ```bash
-DB_URL=your_mongodb_url
-SESSION_SECRET=your_secret_key
+ DB_URL=your_mongodb_url
+ SESSION_SECRET=your_secret_key
 ```
 
 4. Start the server
 
 ```bash
-npm start
+ npm start
 ```
