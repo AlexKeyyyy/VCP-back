@@ -1,20 +1,23 @@
-# Task Management System
+# VCP 2.0 [Backend]
 
-A comprehensive task management system with distinct functionalities for users and administrators. This system allows users to register, log in, solve tasks, and view results, while administrators manage tasks, evaluate candidates, and oversee task solutions. Built with Node.js, Express, and MongoDB, the system also includes several security features such as authentication, rate limiting, and input validation.
+A platform for checking test tasks in 1C for a customer from BIA Technologies. In this repository, a beta version of the web application is being developed for subsequent operation in the release instance. Built with Node.js, Express, and MongoDB, the system also includes several security features such as authentication, rate limiting, and input validation.
 
 ## Features
 
 ### 🛡️ Authentication and Security
+
 - **User Registration and Login**: Users can register and log in with secure, rate-limited attempts to prevent brute-force attacks.
 - **Session Management**: Secure session handling with HTTP-only cookies using `express-session`.
 - **Security Middleware**: Protection with `helmet`, `csurf`, and content security policies.
 
 ### 👤 User Functionality
+
 - **Profile Management**: Users can update profile data, including avatar uploads.
 - **Task Management**: View task information, submit solutions, and add comments.
 - **Result Viewing**: Check task results and download reports.
 
 ### 🛠️ Admin Functionality
+
 - **Candidate and Task Management**: View and assign tasks to candidates, edit tasks, and manage solutions.
 - **Evaluation and Feedback**: Evaluate submissions, provide comments, and generate performance reports.
 - **Statistics and Insights**: Access key statistics and insights for users and tasks.
@@ -47,6 +50,28 @@ A comprehensive task management system with distinct functionalities for users a
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone <repository-url>
    cd <repository-folder>
+
+   ```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Set up environment variables: Create a .env file in the root directory with the following
+
+```bash
+DB_URL=your_mongodb_url
+SESSION_SECRET=your_secret_key
+```
+
+4. Start the server
+
+```bash
+npm start
+```
