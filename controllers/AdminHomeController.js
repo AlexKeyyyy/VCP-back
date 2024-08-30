@@ -5,7 +5,7 @@ import Tasks from "../models/Tasks.js";
 export const getMainStats = async (req, res) => {
   try {
     const countUsers = (await User.find({ role: "user" })).length;
-    const unmarkedTasks = (await UserTasks.find({ status: "checking"})).length;
+    const unmarkedTasks = (await UserTasks.find({ status: "checking", sonarStatus: "checked"})).length;
 
     const countTasks = (await Tasks.find()).length;
     const result = {

@@ -96,6 +96,7 @@ export const getNotAssignedTasks = async (req, res) => {
 
     const notAssignedTasks = await Tasks.find({
       _id: { $nin: assignedTaskIds },
+      status: { $ne: "deleted" },
     });
 
     return res.status(200).json(notAssignedTasks);
